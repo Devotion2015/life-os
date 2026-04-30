@@ -167,25 +167,38 @@ const newTodo = ref({
   tagsText: ''
 })
 
-// 加载数据
+// 加载数据：始终从 JSON 文件加载初始数据，localStorage 仅作增量缓存
 onMounted(async () => {
-  // 先尝试从 localStorage 恢复
-  const savedData = localStorage.getItem('life-os-todos')
-  if (savedData) {
-    todos.value = JSON.parse(savedData)
-    isDataLoaded.value = true
-  }
-
-  // 然后从 JSON 文件加载（如果 localStorage 为空）
-  if (!isDataLoaded.value) {
-    try {
-      const res = await fetch('/life-os/data/todos.json')
-      const data = await res.json()
-      todos.value = data
+  try {
+    const res = await fetch('/life-os/data/todos.json')
+    if (res.ok) {
+      const serverData = await res.json()
+      // 如果 localStorage 有数据且非空，以服务端数据为基础保留本地新增的待办
+      const savedData = localStorage.getItem('life-os-todos')
+      if (savedData) {
+        const localTodos = JSON.parse(savedData)
+        // 收集服务端待办 ID 集合
+        const serverIds = new Set(serverData.map(t => t.id))
+        // 合并：服务端数据 + 本地新增的（不在服务端中的）
+        const localOnly = localTodos.filter(t => !serverIds.has(t.id))
+        todos.value = [...serverData, ...localOnly]
+      } else {
+        todos.value = serverData
+      }
       saveTodos()
+    } else {
+        // fetch 失败时回退到 localStorage
+        const savedData = localStorage.getItem('life-os-todos')
+        if (savedData) todos.value = JSON.parse(savedData)
+      }
+    isDataLoaded.value = true
+  } catch (e) {
+    console.error('加载待办数据失败', e)
+    // 最终回退
+    const savedData = localStorage.getItem('life-os-todos')
+    if (savedData) {
+      todos.value = JSON.parse(savedData)
       isDataLoaded.value = true
-    } catch (e) {
-      console.error('加载待办数据失败', e)
     }
   }
 })
