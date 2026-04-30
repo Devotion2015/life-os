@@ -179,7 +179,7 @@ onMounted(async () => {
   // 然后从 JSON 文件加载（如果 localStorage 为空）
   if (!isDataLoaded.value) {
     try {
-      const res = await fetch('/data/todos.json')
+      const res = await fetch('/life-os/data/todos.json')
       const data = await res.json()
       todos.value = data
       saveTodos()
