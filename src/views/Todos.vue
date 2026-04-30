@@ -33,6 +33,24 @@
       </div>
     </div>
 
+    <!-- 统计 -->
+    <div class="mt-6 bg-white rounded-lg shadow p-4">
+      <div class="flex justify-around text-center">
+        <div>
+          <div class="text-xl sm:text-2xl font-bold text-gray-800">{{ todos.length }}</div>
+          <div class="text-xs sm:text-sm text-gray-500">全部待办</div>
+        </div>
+        <div>
+          <div class="text-xl sm:text-2xl font-bold text-blue-600">{{ pendingCount }}</div>
+          <div class="text-xs sm:text-sm text-gray-500">待完成</div>
+        </div>
+        <div>
+          <div class="text-xl sm:text-2xl font-bold text-green-600">{{ completedCount }}</div>
+          <div class="text-xs sm:text-sm text-gray-500">已完成</div>
+        </div>
+      </div>
+    </div>
+
     <!-- 待办列表 -->
     <div class="space-y-3">
       <div
