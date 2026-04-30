@@ -67,6 +67,10 @@
                 {{ priorityText(todo.priority) }}
               </span>
             </div>
+            <!-- 备注信息 -->
+            <div v-if="todo.notes" class="mt-2 text-sm text-gray-600 bg-yellow-50 px-3 py-2 rounded-lg border-l-4 border-yellow-400">
+              📝 {{ todo.notes }}
+            </div>
             <div v-if="todo.tags && todo.tags.length" class="flex gap-1 mt-2">
               <span v-for="tag in todo.tags" :key="tag" class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">
                 #{{ tag }}
