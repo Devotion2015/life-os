@@ -27,7 +27,7 @@
             </router-link>
           </li>
           <li>
-            <router-link to="/todos" class="flex items-center px-4 py-3 bg-blue-50 text-blue-700 rounded-lg font-medium">
+            <router-link to="/todos" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
               <span class="mr-3">✅</span>
               <span>待办事项</span>
             </router-link>
