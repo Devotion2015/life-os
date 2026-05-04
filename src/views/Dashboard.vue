@@ -139,30 +139,23 @@ const events = ref([])
 const todayStr = computed(() => new Date().toISOString().split('T')[0])
 
 onMounted(async () => {
-  // 并行加载所有数据
-  const fetchers = [
-    ['/life-os/data/todos.json', (d) => { todos.value = d }],
-    ['/life-os/data/projects.json', (d) => { projects.value = d }],
-    ['/life-os/data/okr.json', (d) => { okrs.value = d }],
-    ['/life-os/data/events.json', (d) => { events.value = d }],
-  ]
-  await Promise.all(fetchers.map(async ([url, setter]) => {
-    try {
-      const res = await fetch(url)
-      if (res.ok) setter(await res.json())
-    } catch (e) { /* 静默失败，用 localStorage fallback */ }
-  }))
+  // 优先 localStorage（用户最新数据），否则从 JSON 加载初始数据
+  const savedTodos = localStorage.getItem('life-os-todos')
+  const savedProjects = localStorage.getItem('life-os-projects')
+  const savedOkrs = localStorage.getItem('life-os-okrs')
+  const savedEvents = localStorage.getItem('life-os-events')
 
-  // localStorage fallback
-  if (!todos.value.length) {
-    const s = localStorage.getItem('life-os-todos'); if (s) todos.value = JSON.parse(s)
-  }
-  if (!projects.value.length) {
-    const s = localStorage.getItem('life-os-projects'); if (s) projects.value = JSON.parse(s)
-  }
-  if (!okrs.value.length) {
-    const s = localStorage.getItem('life-os-okrs'); if (s) okrs.value = JSON.parse(s)
-  }
+  if (savedTodos) todos.value = JSON.parse(savedTodos)
+  else { try { const r = await fetch('/life-os/data/todos.json'); if (r.ok) todos.value = await r.json() } catch (e) {} }
+
+  if (savedProjects) projects.value = JSON.parse(savedProjects)
+  else { try { const r = await fetch('/life-os/data/projects.json'); if (r.ok) projects.value = await r.json() } catch (e) {} }
+
+  if (savedOkrs) okrs.value = JSON.parse(savedOkrs)
+  else { try { const r = await fetch('/life-os/data/okr.json'); if (r.ok) okrs.value = await r.json() } catch (e) {} }
+
+  if (savedEvents) events.value = JSON.parse(savedEvents)
+  else { try { const r = await fetch('/life-os/data/events.json'); if (r.ok) events.value = await r.json() } catch (e) {} }
 })
 
 // ---- 统计 ----

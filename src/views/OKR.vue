@@ -242,24 +242,25 @@ const availableQuarters = computed(() => {
 
 // 加载数据
 onMounted(async () => {
-  try {
-    const res = await fetch('/life-os/data/okr.json')
-    if (res.ok) okrs.value = await res.json()
-  } catch (e) {
-    const saved = localStorage.getItem('life-os-okrs')
-    if (saved) okrs.value = JSON.parse(saved)
+  // OKR 数据：优先 localStorage
+  const savedOKR = localStorage.getItem('life-os-okrs')
+  if (savedOKR) {
+    okrs.value = JSON.parse(savedOKR)
+  } else {
+    try { const res = await fetch('/life-os/data/okr.json'); if (res.ok) okrs.value = await res.json() }
+    catch (e) {}
   }
-  try {
-    const res = await fetch('/life-os/data/projects.json')
-    if (res.ok) allProjects.value = await res.json()
-  } catch (e) {
-    const saved = localStorage.getItem('life-os-projects')
-    if (saved) allProjects.value = JSON.parse(saved)
+  // 项目数据：优先 localStorage（用户最新数据）
+  const savedProj = localStorage.getItem('life-os-projects')
+  if (savedProj) {
+    allProjects.value = JSON.parse(savedProj)
+  } else {
+    try { const res = await fetch('/life-os/data/projects.json'); if (res.ok) allProjects.value = await res.json() }
+    catch (e) {}
   }
-  try {
-    const res = await fetch('/life-os/data/todos.json')
-    if (res.ok) allTodos.value = await res.json()
-  } catch (e) {}
+  // 待办数据
+  try { const res = await fetch('/life-os/data/todos.json'); if (res.ok) allTodos.value = await res.json() }
+  catch (e) {}
 })
 
 // 筛选

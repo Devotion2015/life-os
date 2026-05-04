@@ -214,8 +214,16 @@ const editingProject = ref({})
 const isEditingProject = ref(false)
 
 onMounted(async () => {
-  try { const r = await fetch('/life-os/data/projects.json'); if (r.ok) projects.value = await r.json() }
-  catch (e) { const s = localStorage.getItem('life-os-projects'); if (s) projects.value = JSON.parse(s) }
+  // 优先 localStorage（用户最新数据）
+  const saved = localStorage.getItem('life-os-projects')
+  if (saved) {
+    projects.value = JSON.parse(saved)
+  } else {
+    // 首次访问：从 JSON 加载初始数据
+    try { const r = await fetch('/life-os/data/projects.json'); if (r.ok) projects.value = await r.json() }
+    catch (e) {}
+  }
+  // 加载 OKR 和待办数据
   try { const r = await fetch('/life-os/data/okr.json'); if (r.ok) okrs.value = await r.json() }
   catch (e) {}
   try { const r = await fetch('/life-os/data/todos.json'); if (r.ok) allTodos.value = await r.json() }
