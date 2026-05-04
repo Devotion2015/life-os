@@ -70,7 +70,7 @@
           <!-- KR 迷你条 -->
           <div class="space-y-0.5 mt-1.5">
             <div v-for="kr in (obj.key_results || [])" :key="kr.id" class="flex items-center gap-1.5 text-xs">
-              <span class="text-gray-500 w-3 text-right">{{ Math.round(krProgress(kr)) }}%</span>
+              <span class="text-gray-500 w-7 text-right text-[11px]">{{ Math.round(krProgress(kr)) }}%</span>
               <div class="flex-1 bg-gray-100 rounded-full h-1">
                 <div class="h-1 rounded-full" :class="krMiniBarColor(krProgress(kr))"
                   :style="{ width: krProgress(kr) + '%' }"></div>
