@@ -197,30 +197,27 @@ const showEditModal = ref(false)
 const editingTodo = ref({})
 const isEditing = ref(false)
 
-// 加载数据：始终以服务端 JSON 文件为主
+// 加载数据：优先 localStorage（用户最新数据），否则从 JSON 加载初始数据
 onMounted(async () => {
-  try {
-    const res = await fetch('/life-os/data/todos.json')
-    if (res.ok) {
-      const serverData = await res.json()
-      todos.value = serverData
-    } else {
-      const savedData = localStorage.getItem('life-os-todos')
-      if (savedData) todos.value = JSON.parse(savedData)
-    }
-  } catch (e) {
-    console.error('加载待办数据失败', e)
-    const savedData = localStorage.getItem('life-os-todos')
-    if (savedData) todos.value = JSON.parse(savedData)
+  const savedTodos = localStorage.getItem('life-os-todos')
+  if (savedTodos) {
+    todos.value = JSON.parse(savedTodos)
+  } else {
+    try {
+      const res = await fetch('/life-os/data/todos.json')
+      if (res.ok) todos.value = await res.json()
+    } catch (e) { console.error('加载待办数据失败', e) }
   }
 
-  // 加载项目列表（用于筛选和显示名称）
-  try {
-    const res = await fetch('/life-os/data/projects.json')
-    if (res.ok) allProjects.value = await res.json()
-  } catch (e) {
-    const saved = localStorage.getItem('life-os-projects')
-    if (saved) allProjects.value = JSON.parse(saved)
+  // 加载项目列表：优先 localStorage
+  const savedProjects = localStorage.getItem('life-os-projects')
+  if (savedProjects) {
+    allProjects.value = JSON.parse(savedProjects)
+  } else {
+    try {
+      const res = await fetch('/life-os/data/projects.json')
+      if (res.ok) allProjects.value = await res.json()
+    } catch (e) { console.error('加载项目数据失败', e) }
   }
 })
 
