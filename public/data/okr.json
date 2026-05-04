@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "title": "提升教学质量",
+    "description": "优化课程设计，增加实践环节，提升学生满意度和教学效果",
+    "quarter": "2026-Q2",
+    "status": "active",
+    "key_results": [
+      { "id": 1, "title": "完成 3 门课程的教学设计优化", "current": 2, "target": 3, "unit": "门" },
+      { "id": 2, "title": "学生评教满意度达到 90% 以上", "current": 87, "target": 90, "unit": "%" },
+      { "id": 3, "title": "制作并发布 10 套教学 PPT", "current": 6, "target": 10, "unit": "套" }
+    ]
+  },
+  {
+    "id": 2,
+    "title": "科研产出突破",
+    "description": "围绕遥感与GIS方向，争取高质量论文与项目立项",
+    "quarter": "2026-Q2",
+    "status": "active",
+    "key_results": [
+      { "id": 1, "title": "投稿 SCI 期刊论文 2 篇", "current": 1, "target": 2, "unit": "篇" },
+      { "id": 2, "title": "申报省级以上科研项目 1 项", "current": 0, "target": 1, "unit": "项" },
+      { "id": 3, "title": "参加学术会议并做报告 2 次", "current": 1, "target": 2, "unit": "次" }
+    ]
+  },
+  {
+    "id": 3,
+    "title": "个人成长与健康",
+    "description": "保持规律作息和锻炼，推进阅读与技能提升计划",
+    "quarter": "2026-Q2",
+    "status": "active",
+    "key_results": [
+      { "id": 1, "title": "每周健身 3 次", "current": 75, "target": 100, "unit": "%" },
+      { "id": 2, "title": "阅读完 6 本书", "current": 3, "target": 6, "unit": "本" },
+      { "id": 3, "title": "完成 Vue 3 进阶项目实战", "current": 70, "target": 100, "unit": "%" }
+    ]
+  },
+  {
+    "id": 4,
+    "title": "公众号运营",
+    "description": "稳定更新频率，提升内容质量和粉丝互动",
+    "quarter": "2026-Q2",
+    "status": "active",
+    "key_results": [
+      { "id": 1, "title": "发布原创文章 12 篇", "current": 5, "target": 12, "unit": "篇" },
+      { "id": 2, "title": "粉丝数增长至 5000", "current": 3200, "target": 5000, "unit": "人" },
+      { "id": 3, "title": "平均阅读量达到 800+", "current": 520, "target": 800, "unit": "次" }
+    ]
+  }
+]

@@ -1,0 +1,186 @@
+{
+  "entries": [
+    {
+      "id": "K001",
+      "title": "Vue 3 组合式 API 核心概念",
+      "category": "programming",
+      "tags": [
+        "Vue",
+        "前端",
+        "JavaScript"
+      ],
+      "content": "## Vue 3 组合式 API\n\n### ref vs reactive\n- `ref()` 用于基本类型，需 `.value` 访问\n- `reactive()` 用于对象，直接访问属性\n- `computed()` 派生计算状态\n\n### 生命周期\n- `onMounted()`, `onUnmounted()`, `onUpdated()`\n\n### watch vs watchEffect\n- `watch()` 显式指定监听源\n- `watchEffect()` 自动追踪依赖",
+      "source": {
+        "type": "article",
+        "title": "Vue 3 官方文档",
+        "url": "https://cn.vuejs.org/guide/extras/composition-api-faq.html"
+      },
+      "relatedEntries": [
+        "K003"
+      ],
+      "status": "published",
+      "createdAt": "2026-04-30",
+      "updatedAt": "2026-05-02"
+    },
+    {
+      "id": "K002",
+      "title": "Python f-string 高级技巧",
+      "category": "programming",
+      "tags": [
+        "Python",
+        "字符串"
+      ],
+      "content": "## f-string 技巧\n\n### 格式化数字\n```python\nnum = 3.14159\nprint(f\"pi={num:.2f}\")  # pi=3.14\nprint(f\"{1000000:,}\")   # 1,000,000\n```\n\n### 对齐与填充\n```python\nname = \"阿财\"\nprint(f\"{name:>10}\")   # 右对齐\nprint(f\"{name:*^10}\")  # 居中填充*\n```\n\n### 调试输出\n```python\nprint(f\"{x=}, {y=}\")  # x=10, y=20\n```",
+      "source": {
+        "type": "article",
+        "title": "Real Python: f-strings Guide",
+        "url": "https://realpython.com/python-f-strings/"
+      },
+      "relatedEntries": [],
+      "status": "published",
+      "createdAt": "2026-05-01",
+      "updatedAt": "2026-05-01"
+    },
+    {
+      "id": "K003",
+      "title": "Tailwind CSS v4 迁移笔记",
+      "category": "programming",
+      "tags": [
+        "Tailwind",
+        "CSS",
+        "前端"
+      ],
+      "content": "## Tailwind CSS v4 变化\n\n### 配置方式改变\n- v3: `tailwind.config.js`\n- v4: CSS-first 配置，通过 `@theme` 指令\n\n### 新增特性\n- 容器查询 `@container`\n- 动态视口单位 `dvh/dvw`\n- 原生 CSS 嵌套支持\n\n### 迁移要点\n- 移除旧的 `@tailwind` 指令\n- 使用 `@import \"tailwindcss\"`\n- 颜色类名保持兼容",
+      "source": {
+        "type": "article",
+        "title": "Tailwind CSS v4 升级指南",
+        "url": ""
+      },
+      "relatedEntries": [
+        "K001"
+      ],
+      "status": "published",
+      "createdAt": "2026-04-28",
+      "updatedAt": "2026-04-30"
+    },
+    {
+      "id": "K004",
+      "title": "GIS 中常见的坐标系及其转换",
+      "category": "gis",
+      "tags": [
+        "GIS",
+        "坐标系",
+        "测绘"
+      ],
+      "content": "## 常见坐标系\n\n### WGS84 (EPSG:4326)\n- GPS 使用的经纬度坐标系\n- 地心坐标系\n\n### Web Mercator (EPSG:3857)\n- 网络地图常用投影\n- Google Maps, 高德, 百度均使用\n- 特点：越靠近两极变形越大\n\n### CGCS2000 (EPSG:4490)\n- 中国大地坐标系 2000\n- 国家测绘基准\n\n### 坐标转换\n```python\nfrom pyproj import Transformer\ntransformer = Transformer.from_crs(4326, 3857)\nx, y = transformer.transform(lat, lon)\n```",
+      "source": {
+        "type": "book",
+        "title": "测绘学基础",
+        "url": ""
+      },
+      "relatedEntries": [],
+      "status": "published",
+      "createdAt": "2026-04-25",
+      "updatedAt": "2026-04-25"
+    },
+    {
+      "id": "K005",
+      "title": "公众号排版最佳实践",
+      "category": "content",
+      "tags": [
+        "公众号",
+        "排版",
+        "创作"
+      ],
+      "content": "## 排版规范\n\n### 字体与字号\n- 正文: 15px, 深灰色 #333\n- 标题: 18-20px, 加粗\n- 引用: 14px, 灰色 #666\n\n### 间距\n- 段间距: 1.5 倍行距\n- 图片上下留白 1 行\n\n### 配色\n- 主色不超过 3 种\n- 代码块用浅灰背景\n\n### Markdown 转公众号\n- 使用 markdown-nice 或墨滴编辑器\n- 代码高亮主题: vs2015",
+      "source": {
+        "type": "note",
+        "title": "个人经验总结",
+        "url": ""
+      },
+      "relatedEntries": [],
+      "status": "published",
+      "createdAt": "2026-04-20",
+      "updatedAt": "2026-04-20"
+    }
+  ],
+  "readingList": [
+    {
+      "id": "R001",
+      "title": "代码整洁之道",
+      "author": "Robert C. Martin",
+      "type": "book",
+      "status": "reading",
+      "progress": 65,
+      "rating": 0,
+      "notes": "",
+      "startDate": "2026-03-15",
+      "completedDate": null,
+      "cover": ""
+    },
+    {
+      "id": "R002",
+      "title": "流畅的 Python（第2版）",
+      "author": "Luciano Ramalho",
+      "type": "book",
+      "status": "want_to_read",
+      "progress": 0,
+      "rating": 0,
+      "notes": "",
+      "startDate": null,
+      "completedDate": null,
+      "cover": ""
+    },
+    {
+      "id": "R003",
+      "title": "Designing Data-Intensive Applications",
+      "author": "Martin Kleppmann",
+      "type": "book",
+      "status": "reading",
+      "progress": 30,
+      "rating": 5,
+      "notes": "",
+      "startDate": "2026-04-01",
+      "completedDate": null,
+      "cover": ""
+    }
+  ],
+  "log": [
+    {
+      "date": "2026-05-02",
+      "action": "update",
+      "description": "更新了「Vue 3 组合式 API」笔记，补充生命周期部分",
+      "entryId": "K001"
+    },
+    {
+      "date": "2026-05-01",
+      "action": "create",
+      "description": "新建了「Python f-string 高级技巧」知识条目",
+      "entryId": "K002"
+    },
+    {
+      "date": "2026-04-30",
+      "action": "update",
+      "description": "更新了「Tailwind CSS v4 迁移笔记」",
+      "entryId": "K003"
+    },
+    {
+      "date": "2026-04-30",
+      "action": "create",
+      "description": "新建了「Vue 3 组合式 API 核心概念」知识条目",
+      "entryId": "K001"
+    },
+    {
+      "date": "2026-04-25",
+      "action": "create",
+      "description": "新建了「GIS 坐标系」知识条目",
+      "entryId": "K004"
+    },
+    {
+      "date": "2026-04-20",
+      "action": "create",
+      "description": "新建了「公众号排版最佳实践」知识条目",
+      "entryId": "K005"
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+[
+  {
+    "id": 1,
+    "title": "数字测图授课",
+    "date": "2024-05-06",
+    "start_time": "08:00",
+    "end_time": "09:40",
+    "category": "教学",
+    "location": "教A-301",
+    "description": "第8讲：数字地形测绘",
+    "project_id": "P001",
+    "todo_id": null
+  },
+  {
+    "id": 2,
+    "title": "GIS原理授课",
+    "date": "2024-05-07",
+    "start_time": "10:00",
+    "end_time": "11:40",
+    "category": "教学",
+    "location": "教B-205",
+    "description": "第6讲：空间分析",
+    "project_id": "P001",
+    "todo_id": null
+  },
+  {
+    "id": 3,
+    "title": "系例会",
+    "date": "2024-05-08",
+    "start_time": "14:00",
+    "end_time": "16:00",
+    "category": "行政",
+    "location": "系会议室",
+    "description": "月度工作汇报",
+    "project_id": null,
+    "todo_id": null
+  },
+  {
+    "id": 4,
+    "title": "科研组会",
+    "date": "2024-05-09",
+    "start_time": "15:00",
+    "end_time": "17:00",
+    "category": "科研",
+    "location": "遥感实验室",
+    "description": "研究生进度汇报",
+    "project_id": null,
+    "todo_id": null
+  },
+  {
+    "id": 5,
+    "title": "健身",
+    "date": "2024-05-10",
+    "start_time": "18:00",
+    "end_time": "19:30",
+    "category": "个人",
+    "location": "健身房",
+    "description": "每周三次锻炼",
+    "project_id": null,
+    "todo_id": null
+  },
+  {
+    "id": 6,
+    "title": "论文审稿",
+    "date": "2024-05-11",
+    "start_time": "09:00",
+    "end_time": "12:00",
+    "category": "科研",
+    "location": "办公室",
+    "description": "审阅期刊稿件",
+    "project_id": null,
+    "todo_id": null
+  },
+  {
+    "id": 7,
+    "title": "期末命题",
+    "date": "2024-05-12",
+    "start_time": "14:00",
+    "end_time": "17:00",
+    "category": "教学",
+    "location": "办公室",
+    "description": "数字测图期末试卷",
+    "project_id": "P003",
+    "todo_id": null
+  }
+]

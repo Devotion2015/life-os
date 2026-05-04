@@ -1,0 +1,181 @@
+{
+  "transactions": [
+    {
+      "id": "TR001",
+      "date": "2026-05-04",
+      "type": "expense",
+      "category": "dining",
+      "amount": 28.5,
+      "description": "午餐+奶茶",
+      "month": "2026-05"
+    },
+    {
+      "id": "TR002",
+      "date": "2026-05-03",
+      "type": "expense",
+      "category": "office",
+      "amount": 45.0,
+      "description": "打印店打印教案",
+      "month": "2026-05"
+    },
+    {
+      "id": "TR003",
+      "date": "2026-05-02",
+      "type": "expense",
+      "category": "shopping",
+      "amount": 199.0,
+      "description": "机械键盘键帽",
+      "month": "2026-05"
+    },
+    {
+      "id": "TR004",
+      "date": "2026-05-01",
+      "type": "expense",
+      "category": "entertainment",
+      "amount": 35.0,
+      "description": "B站大会员月费",
+      "month": "2026-05"
+    },
+    {
+      "id": "TR005",
+      "date": "2026-05-01",
+      "type": "expense",
+      "category": "transport",
+      "amount": 200.0,
+      "description": "加油",
+      "month": "2026-05"
+    },
+    {
+      "id": "TR006",
+      "date": "2026-05-01",
+      "type": "income",
+      "category": "salary",
+      "amount": 8500.0,
+      "description": "5月工资",
+      "month": "2026-05"
+    },
+    {
+      "id": "TR007",
+      "date": "2026-04-28",
+      "type": "expense",
+      "category": "dining",
+      "amount": 156.0,
+      "description": "和朋友聚餐",
+      "month": "2026-04"
+    },
+    {
+      "id": "TR008",
+      "date": "2026-04-25",
+      "type": "expense",
+      "category": "books",
+      "amount": 68.0,
+      "description": "技术书籍两本",
+      "month": "2026-04"
+    },
+    {
+      "id": "TR009",
+      "date": "2026-04-20",
+      "type": "expense",
+      "category": "housing",
+      "amount": 2500.0,
+      "description": "房租",
+      "month": "2026-04"
+    },
+    {
+      "id": "TR010",
+      "date": "2026-04-15",
+      "type": "expense",
+      "category": "digital",
+      "amount": 299.0,
+      "description": "机械键盘",
+      "month": "2026-04"
+    },
+    {
+      "id": "TR011",
+      "date": "2026-04-10",
+      "type": "expense",
+      "category": "transport",
+      "amount": 150.0,
+      "description": "加油",
+      "month": "2026-04"
+    },
+    {
+      "id": "TR012",
+      "date": "2026-04-01",
+      "type": "income",
+      "category": "salary",
+      "amount": 8500.0,
+      "description": "4月工资",
+      "month": "2026-04"
+    },
+    {
+      "id": "TR013",
+      "date": "2026-03-28",
+      "type": "expense",
+      "category": "entertainment",
+      "amount": 88.0,
+      "description": "Steam游戏",
+      "month": "2026-03"
+    },
+    {
+      "id": "TR014",
+      "date": "2026-03-20",
+      "type": "expense",
+      "category": "housing",
+      "amount": 2500.0,
+      "description": "房租",
+      "month": "2026-03"
+    },
+    {
+      "id": "TR015",
+      "date": "2026-03-01",
+      "type": "income",
+      "category": "salary",
+      "amount": 8500.0,
+      "description": "3月工资",
+      "month": "2026-03"
+    }
+  ],
+  "budgets": [
+    {
+      "id": "B001",
+      "category": "housing",
+      "monthly": 2500
+    },
+    {
+      "id": "B002",
+      "category": "dining",
+      "monthly": 1500
+    },
+    {
+      "id": "B003",
+      "category": "transport",
+      "monthly": 600
+    },
+    {
+      "id": "B004",
+      "category": "entertainment",
+      "monthly": 500
+    },
+    {
+      "id": "B005",
+      "category": "shopping",
+      "monthly": 800
+    },
+    {
+      "id": "B006",
+      "category": "office",
+      "monthly": 300
+    },
+    {
+      "id": "B007",
+      "category": "digital",
+      "monthly": 500
+    },
+    {
+      "id": "B008",
+      "category": "books",
+      "monthly": 200
+    }
+  ]
+}

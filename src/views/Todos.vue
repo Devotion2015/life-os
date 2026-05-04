@@ -37,6 +37,13 @@
             </div>
           </div>
           <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">所属项目</label>
+            <select v-model="editingTodo.project_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+              <option value="">无</option>
+              <option v-for="p in allProjects" :key="p.id" :value="p.id">{{ p.name }}</option>
+            </select>
+          </div>
+          <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">备注</label>
             <textarea v-model="editingTodo.notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="添加备注..."></textarea>
           </div>
@@ -69,10 +76,15 @@
           <option value="medium">中</option>
           <option value="low">低</option>
         </select>
+        <select v-model="filterProject" class="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg text-sm">
+          <option value="all">全部项目</option>
+          <option value="none">无项目</option>
+          <option v-for="p in allProjects" :key="p.id" :value="p.id">{{ p.name }}</option>
+        </select>
         <input
           v-model="searchText"
           type="text"
-          placeholder="搜索待办..."
+          placeholder="搜索标题、备注、日期、学期..."
           class="w-full sm:flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
         />
       </div>
@@ -124,6 +136,9 @@
               <span v-if="todo.semester" class="bg-gray-100 px-2 py-0.5 rounded">{{ todo.semester }}</span>
               <span v-if="todo.deadline">📅 {{ todo.deadline }}</span>
               <span v-if="todo.completed_date">✅ {{ todo.completed_date }}</span>
+              <span v-if="getProjectName(todo.project_id)" class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">
+                📋 {{ getProjectName(todo.project_id) }}
+              </span>
               <span
                 class="px-2 py-0.5 rounded text-white"
                 :class="{
@@ -171,8 +186,10 @@
 import { ref, computed, onMounted } from 'vue'
 
 const todos = ref([])
+const allProjects = ref([])
 const filterStatus = ref('all')
 const filterPriority = ref('all')
+const filterProject = ref('all')
 const searchText = ref('')
 
 // 编辑弹窗状态
@@ -186,10 +203,8 @@ onMounted(async () => {
     const res = await fetch('/life-os/data/todos.json')
     if (res.ok) {
       const serverData = await res.json()
-      // 直接使用服务端数据，不需要 localStorage 逻辑
       todos.value = serverData
     } else {
-      // fetch 失败时尝试 localStorage
       const savedData = localStorage.getItem('life-os-todos')
       if (savedData) todos.value = JSON.parse(savedData)
     }
@@ -198,14 +213,46 @@ onMounted(async () => {
     const savedData = localStorage.getItem('life-os-todos')
     if (savedData) todos.value = JSON.parse(savedData)
   }
+
+  // 加载项目列表（用于筛选和显示名称）
+  try {
+    const res = await fetch('/life-os/data/projects.json')
+    if (res.ok) allProjects.value = await res.json()
+  } catch (e) {
+    const saved = localStorage.getItem('life-os-projects')
+    if (saved) allProjects.value = JSON.parse(saved)
+  }
 })
+
+// 通过 project_id 获取项目名称
+function getProjectName(pid) {
+  if (!pid) return null
+  const p = allProjects.value.find(p => p.id === pid)
+  return p ? p.name : null
+}
 
 // 筛选后的待办列表
 const filteredTodos = computed(() => {
   return todos.value.filter(todo => {
     if (filterStatus.value !== 'all' && todo.status !== filterStatus.value) return false
     if (filterPriority.value !== 'all' && todo.priority !== filterPriority.value) return false
-    if (searchText.value && !todo.text.includes(searchText.value)) return false
+    if (filterProject.value !== 'all') {
+      if (filterProject.value === 'none') {
+        if (todo.project_id) return false
+      } else {
+        if (todo.project_id !== filterProject.value) return false
+      }
+    }
+    if (searchText.value) {
+      const search = searchText.value.toLowerCase()
+      const matchText = todo.text?.toLowerCase().includes(search)
+      const matchDeadline = todo.deadline?.toLowerCase().includes(search)
+      const matchSemester = todo.semester?.toLowerCase().includes(search)
+      const matchNotes = todo.notes?.toLowerCase().includes(search)
+      const matchCompleted = todo.completed_date?.toLowerCase().includes(search)
+      const matchProject = getProjectName(todo.project_id)?.toLowerCase().includes(search)
+      if (!matchText && !matchDeadline && !matchSemester && !matchNotes && !matchCompleted && !matchProject) return false
+    }
     return true
   })
 })
