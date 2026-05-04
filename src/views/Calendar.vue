@@ -256,17 +256,18 @@ const categoryLabel = (cat) => {
   return c.emoji + ' ' + c.label
 }
 
-// 加载数据
+// 加载数据：优先 localStorage，首次从 JSON 导入
 onMounted(async () => {
-  try {
-    const res = await fetch('/life-os/data/events.json')
-    if (res.ok) {
-      events.value = await res.json()
+  const saved = localStorage.getItem('life-os-events')
+  if (saved) {
+    events.value = JSON.parse(saved)
+  } else {
+    try {
+      const res = await fetch('/life-os/data/events.json')
+      if (res.ok) events.value = await res.json()
+    } catch (e) {
+      console.error('加载日程数据失败', e)
     }
-  } catch (e) {
-    console.error('加载日程数据失败', e)
-    const saved = localStorage.getItem('life-os-events')
-    if (saved) events.value = JSON.parse(saved)
   }
 })
 
