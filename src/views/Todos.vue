@@ -42,6 +42,7 @@
               <option value="">无</option>
               <option v-for="p in allProjects" :key="p.id" :value="p.id">{{ p.name }}</option>
             </select>
+            <p class="text-[10px] text-gray-400 mt-0.5">选择项目后，该待办会显示在项目管理卡片中</p>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">备注</label>
@@ -292,7 +293,8 @@ const openAddModal = () => {
     priority: 'medium',
     semester: '',
     deadline: '',
-    notes: ''
+    notes: '',
+    project_id: ''
   }
   isEditing.value = false
   showEditModal.value = true
