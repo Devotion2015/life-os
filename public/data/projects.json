@@ -5,13 +5,30 @@
     "type": "teaching",
     "status": "active",
     "deadline": "2026-06-30",
-    "okr_ids": [1],
-    "kr_refs": ["1-1"],
     "tasks": [
-      { "id": "T001", "text": "完成前12讲教案", "completed": true },
-      { "id": "T002", "text": "完成中12讲教案", "completed": true },
-      { "id": "T003", "text": "完成后12讲教案", "completed": false },
-      { "id": "T004", "text": "完成安全教育教案", "completed": false }
+      {
+        "id": "T001",
+        "text": "完成前12讲教案",
+        "completed": true
+      },
+      {
+        "id": "T002",
+        "text": "完成中12讲教案",
+        "completed": true
+      },
+      {
+        "id": "T003",
+        "text": "完成后12讲教案",
+        "completed": false
+      },
+      {
+        "id": "T004",
+        "text": "完成安全教育教案",
+        "completed": false
+      }
+    ],
+    "kr_ids": [
+      "K001"
     ]
   },
   {
@@ -20,12 +37,27 @@
     "type": "content",
     "status": "active",
     "deadline": null,
-    "okr_ids": [4],
-    "kr_refs": ["4-1", "4-2", "4-3"],
     "tasks": [
-      { "id": "T005", "text": "技术门文章 12 篇", "completed": false },
-      { "id": "T006", "text": "影视门安利 6 篇", "completed": false },
-      { "id": "T007", "text": "书单推荐 4 篇", "completed": false }
+      {
+        "id": "T005",
+        "text": "技术门文章 12 篇",
+        "completed": false
+      },
+      {
+        "id": "T006",
+        "text": "影视门安利 6 篇",
+        "completed": false
+      },
+      {
+        "id": "T007",
+        "text": "书单推荐 4 篇",
+        "completed": false
+      }
+    ],
+    "kr_ids": [
+      "K010",
+      "K011",
+      "K012"
     ]
   },
   {
@@ -34,12 +66,25 @@
     "type": "teaching",
     "status": "planning",
     "deadline": "2026-09-01",
-    "okr_ids": [1],
-    "kr_refs": ["1-3"],
     "tasks": [
-      { "id": "T008", "text": "确定题库范围与题型", "completed": false },
-      { "id": "T009", "text": "编写第1-6讲测验题", "completed": false },
-      { "id": "T010", "text": "编写第7-12讲测验题", "completed": false }
+      {
+        "id": "T008",
+        "text": "确定题库范围与题型",
+        "completed": false
+      },
+      {
+        "id": "T009",
+        "text": "编写第1-6讲测验题",
+        "completed": false
+      },
+      {
+        "id": "T010",
+        "text": "编写第7-12讲测验题",
+        "completed": false
+      }
+    ],
+    "kr_ids": [
+      "K003"
     ]
   },
   {
@@ -48,12 +93,23 @@
     "type": "personal",
     "status": "active",
     "deadline": null,
-    "okr_ids": [],
-    "kr_refs": [],
     "tasks": [
-      { "id": "T011", "text": "补充鸟类音频资源", "completed": false },
-      { "id": "T012", "text": "新增鸟类品种（目标20+）", "completed": false },
-      { "id": "T013", "text": "优化移动端展示效果", "completed": false }
-    ]
+      {
+        "id": "T011",
+        "text": "补充鸟类音频资源",
+        "completed": false
+      },
+      {
+        "id": "T012",
+        "text": "新增鸟类品种（目标20+）",
+        "completed": false
+      },
+      {
+        "id": "T013",
+        "text": "优化移动端展示效果",
+        "completed": false
+      }
+    ],
+    "kr_ids": []
   }
 ]

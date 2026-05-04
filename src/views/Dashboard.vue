@@ -45,7 +45,7 @@
               :style="{ width: projectProgress(p) + '%' }"></div>
           </div>
           <div class="flex items-center gap-2 mt-1 text-xs text-gray-400">
-            <span v-for="oid in (p.okr_ids || [])" :key="oid" class="text-purple-500">🎯 {{ getOKRName(oid) }}</span>
+            <span v-for="kid in (p.kr_ids || [])" :key="kid" class="text-indigo-500 text-[11px]">🎯 {{ getKRName(kid) }}</span>
             <span class="ml-auto">{{ getProjectTodoDone(p.id) }}/{{ getProjectTodoCount(p.id) }} 待办</span>
           </div>
         </div>
@@ -254,9 +254,12 @@ function getProjectName(pid) {
   return p ? p.name : null
 }
 
-function getOKRName(id) {
-  const o = okrs.value.find(o => o.id === id)
-  return o ? o.title : `目标${id}`
+function getKRName(kid) {
+  for (const o of okrs.value) {
+    const kr = (o.key_results || []).find(k => k.id === kid)
+    if (kr) return kr.title.length > 10 ? kr.title.slice(0, 10) + '…' : kr.title
+  }
+  return kid
 }
 
 function isOverdue(d) { return d ? new Date(d) < new Date(todayStr.value) : false }

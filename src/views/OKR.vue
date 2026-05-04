@@ -62,7 +62,7 @@
             </div>
           </div>
           <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-700">
-            💡 编辑 <strong>起始值</strong>（当前值）仅在没有关联项目时生效。有关联项目时，进度由待办完成率自动计算。
+            💡 <strong>起始值</strong>仅在 KR 没有关联项目时有效。关联项目后，进度由待办完成率自动计算。
           </div>
         </div>
         <div class="flex gap-3 mt-6 justify-end">
@@ -123,7 +123,6 @@
               <button @click="editObj(obj)" class="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors" title="编辑">✏️</button>
             </div>
           </div>
-          <!-- Objective 进度条 -->
           <div class="mt-3">
             <div class="flex justify-between text-xs text-gray-500 mb-1">
               <span>目标进度</span>
@@ -139,91 +138,62 @@
 
         <!-- Key Results 列表 -->
         <div class="divide-y divide-gray-50">
-          <div v-for="kr in (obj.key_results || [])" :key="kr.id"
-            class="px-4 sm:px-5 py-3">
-
+          <div v-for="kr in (obj.key_results || [])" :key="kr.id" class="px-4 sm:px-5 py-3">
             <div class="flex items-start gap-3">
-              <!-- KR 进度圆环 -->
               <div class="flex-shrink-0 w-10 h-10 relative">
                 <svg class="w-10 h-10 transform -rotate-90">
                   <circle cx="20" cy="20" r="16" fill="none" stroke="#e5e7eb" stroke-width="4" />
                   <circle cx="20" cy="20" r="16" fill="none"
-                    :stroke="krProgressColor(krProgressFor(obj.id, kr))"
-                    stroke-width="4"
-                    stroke-linecap="round"
+                    :stroke="krProgressColor(krProgressFor(kr))"
+                    stroke-width="4" stroke-linecap="round"
                     :stroke-dasharray="100.5"
-                    :stroke-dashoffset="100.5 - krProgressFor(obj.id, kr)"
+                    :stroke-dashoffset="100.5 - krProgressFor(kr)"
                     class="transition-all duration-700" />
                 </svg>
                 <span class="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-gray-600">
-                  {{ Math.round(krProgressFor(obj.id, kr)) }}%
+                  {{ Math.round(krProgressFor(kr)) }}%
                 </span>
               </div>
-
-              <!-- KR 内容 -->
               <div class="flex-1 min-w-0">
                 <div class="flex items-start justify-between gap-2">
                   <span class="text-sm text-gray-700 font-medium">{{ kr.title }}</span>
-                  <button @click="editKRForObj(obj, kr)" class="p-0.5 text-gray-300 hover:text-blue-500 opacity-0 hover:opacity-100 transition-all flex-shrink-0 group/btn" title="编辑">✎</button>
+                  <button @click="editKRForObj(obj, kr)" class="p-0.5 text-gray-300 hover:text-blue-500 opacity-0 hover:opacity-100 transition-all flex-shrink-0" title="编辑">✎</button>
                 </div>
-
-                <!-- 自动模式：有关联项目 -->
-                <div v-if="hasKRLinkedProjects(obj.id, kr.id)" class="mt-1.5">
+                <div v-if="hasKRLinkedProjects(kr.id)" class="mt-1.5">
                   <div class="flex items-center justify-between mb-1">
-                    <span class="text-xs text-green-600 font-medium">📊 自动计算</span>
-                    <span class="text-xs text-gray-400">
-                      {{ krAutoValue(obj.id, kr) }} / {{ kr.target }} {{ kr.unit }}
-                    </span>
+                    <span class="text-xs text-green-600 font-medium">📊 自动 · {{ getKRTodoDone(kr.id) }}/{{ getKRTodoTotal(kr.id) }} 待办</span>
+                    <span class="text-xs text-gray-400">{{ krAutoValue(kr) }} / {{ kr.target }} {{ kr.unit }}</span>
                   </div>
-                  <!-- 贡献来源 -->
                   <div class="flex flex-wrap gap-1">
-                    <span v-for="p in getKRProjects(obj.id, kr.id)" :key="p.id"
-                      class="text-[10px] bg-green-50 text-green-700 px-1.5 py-0.5 rounded border border-green-100 inline-flex items-center gap-1">
-                      {{ p.name }}
-                      <span class="text-green-400">({{ getKRTodoDone(obj.id, kr.id) }}/{{ getKRTodoTotal(obj.id, kr.id) }})</span>
-                    </span>
+                    <span v-for="p in getKRProjects(kr.id)" :key="p.id"
+                      class="text-[10px] bg-green-50 text-green-700 px-1.5 py-0.5 rounded border border-green-100">{{ p.name }}</span>
                   </div>
                 </div>
-
-                <!-- 手动模式：无关联项目 → 滑块 -->
                 <div v-else class="flex items-center gap-2 mt-1.5">
-                  <input v-model.number="kr.current" type="range"
-                    :min="0" :max="kr.target"
-                    class="flex-1 h-1.5 accent-blue-500 cursor-pointer"
-                    @input="saveKRProgress(obj)" />
-                  <span class="text-xs text-gray-400 flex-shrink-0 min-w-[90px] text-right">
-                    {{ kr.current }} / {{ kr.target }} {{ kr.unit }}
-                  </span>
+                  <input v-model.number="kr.current" type="range" :min="0" :max="kr.target"
+                    class="flex-1 h-1.5 accent-blue-500 cursor-pointer" @input="persist()" />
+                  <span class="text-xs text-gray-400 flex-shrink-0 min-w-[90px] text-right">{{ kr.current }} / {{ kr.target }} {{ kr.unit }}</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- 关联项目总览 -->
-        <div v-if="getLinkedProjects(obj.id).length > 0" class="px-4 sm:px-5 py-3 bg-purple-50 border-t border-purple-100">
-          <div class="text-xs font-medium text-purple-700 mb-1.5">
-            📋 关联项目 {{ getLinkedProjects(obj.id).length }} 个
-            · 合计 {{ getObjTodoDone(obj.id) }}/{{ getObjTodoTotal(obj.id) }} 待办完成
+        <div v-if="getObjProjects(obj.id).length > 0" class="px-4 sm:px-5 py-3 bg-indigo-50 border-t border-indigo-100">
+          <div class="text-xs font-medium text-indigo-700 mb-1.5">
+            📋 本目标下 {{ getObjProjects(obj.id).length }} 个项目 · 合计 {{ getObjTodoDone(obj.id) }}/{{ getObjTodoTotal(obj.id) }} 待办完成
           </div>
           <div class="flex flex-wrap gap-1.5">
-            <span v-for="p in getLinkedProjects(obj.id)" :key="p.id"
-              class="text-xs bg-white text-purple-700 px-2 py-1 rounded border border-purple-200">
-              {{ p.name }}
-              <span class="text-purple-400 ml-0.5">→ KR{{ getProjectKRRefs(p.id, obj.id).join(',') }}</span>
-            </span>
+            <span v-for="p in getObjProjects(obj.id)" :key="p.id"
+              class="text-xs bg-white text-indigo-700 px-2 py-1 rounded border border-indigo-200">{{ p.name }}</span>
           </div>
         </div>
 
-        <!-- 底部：添加 KR -->
         <div class="px-4 sm:px-5 py-3 bg-gray-50 border-t border-gray-100">
-          <button @click="openAddKR(obj)" class="text-sm text-blue-500 hover:text-blue-600 flex items-center gap-1">
-            <span>+</span> 添加关键结果
-          </button>
+          <button @click="openAddKR(obj)" class="text-sm text-blue-500 hover:text-blue-600 flex items-center gap-1"><span>+</span> 添加关键结果</button>
         </div>
       </div>
 
-      <!-- 空状态 -->
       <div v-if="filteredOKRs.length === 0" class="text-center py-16 text-gray-400">
         <div class="text-4xl mb-3">🎯</div>
         <p>{{ filterQuarter ? '该季度暂无目标' : '还没有目标，开始设定第一个吧！' }}</p>
@@ -236,7 +206,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 
-// ===== 数据状态 =====
 const okrs = ref([])
 const allProjects = ref([])
 const allTodos = ref([])
@@ -247,270 +216,78 @@ const editingKR = ref({})
 const editingObjForKR = ref(null)
 const filterQuarter = ref('')
 
-// ===== 可用季度 =====
+const krObjMap = computed(() => {
+  const map = {}
+  for (const obj of okrs.value) for (const kr of (obj.key_results || [])) map[kr.id] = obj.id
+  return map
+})
+
 const availableQuarters = computed(() => {
-  const quarters = new Set()
-  okrs.value.forEach(o => quarters.add(o.quarter))
-  const now = new Date()
-  const y = now.getFullYear()
-  const m = now.getMonth()
-  const currentQ = `${y}-Q${Math.floor(m / 3) + 1}`
-  quarters.add(currentQ)
-  const nextQ = Math.floor(m / 3) + 2
-  if (nextQ > 4) {
-    quarters.add(`${y + 1}-Q1`)
-  } else {
-    quarters.add(`${y}-Q${nextQ}`)
-  }
-  return Array.from(quarters).sort().reverse()
+  const qs = new Set(); okrs.value.forEach(o => qs.add(o.quarter))
+  const now = new Date(); const y = now.getFullYear(); const m = now.getMonth()
+  qs.add(`${y}-Q${Math.floor(m/3)+1}`)
+  const nq = Math.floor(m/3)+2; qs.add(nq>4?`${y+1}-Q1`:`${y}-Q${nq}`)
+  return Array.from(qs).sort().reverse()
 })
 
-// ===== 数据加载 =====
 onMounted(async () => {
-  // OKR：优先 localStorage
-  const savedOKR = localStorage.getItem('life-os-okrs')
-  if (savedOKR) {
-    okrs.value = JSON.parse(savedOKR)
-  } else {
-    try { const res = await fetch('/life-os/data/okr.json'); if (res.ok) okrs.value = await res.json() }
-    catch (e) {}
-  }
-
-  // 项目：优先 localStorage
-  const savedProj = localStorage.getItem('life-os-projects')
-  if (savedProj) {
-    allProjects.value = JSON.parse(savedProj)
-  } else {
-    try { const res = await fetch('/life-os/data/projects.json'); if (res.ok) allProjects.value = await res.json() }
-    catch (e) {}
-  }
-
-  // 待办：优先 localStorage（与 Projects/Todos 共享）
-  const savedTodos = localStorage.getItem('life-os-todos')
-  if (savedTodos) {
-    allTodos.value = JSON.parse(savedTodos)
-  } else {
-    try { const res = await fetch('/life-os/data/todos.json'); if (res.ok) allTodos.value = await res.json() }
-    catch (e) {}
-  }
+  const s = localStorage.getItem('life-os-okrs')
+  if (s) okrs.value = JSON.parse(s); else { try { const r = await fetch('/life-os/data/okr.json'); if (r.ok) okrs.value = await r.json() } catch(e){} }
+  const sp = localStorage.getItem('life-os-projects')
+  if (sp) allProjects.value = JSON.parse(sp); else { try { const r = await fetch('/life-os/data/projects.json'); if (r.ok) allProjects.value = await r.json() } catch(e){} }
+  const st = localStorage.getItem('life-os-todos')
+  if (st) allTodos.value = JSON.parse(st); else { try { const r = await fetch('/life-os/data/todos.json'); if (r.ok) allTodos.value = await r.json() } catch(e){} }
 })
 
-// ===== KR-PROJECT-TODO 三角计算 =====
-
-// 获取指定 KR 关联的所有项目
-function getKRProjects(objId, krId) {
-  return allProjects.value.filter(p =>
-    (p.kr_refs || []).includes(`${objId}-${krId}`)
-  )
+function getKRProjects(krId) { return allProjects.value.filter(p => (p.kr_ids||[]).includes(krId)) }
+function getKRTodos(krId) { const pids = new Set(getKRProjects(krId).map(p=>p.id)); return allTodos.value.filter(t=>pids.has(t.project_id)) }
+function hasKRLinkedProjects(krId) { return getKRProjects(krId).length > 0 }
+function getKRTodoDone(krId) { return getKRTodos(krId).filter(t=>t.status==='completed').length }
+function getKRTodoTotal(krId) { return getKRTodos(krId).length }
+function krAutoProgress(krId) { const ts=getKRTodos(krId); return ts.length?Math.round(ts.filter(t=>t.status==='completed').length/ts.length*100):0 }
+function krAutoValue(kr) { return Math.round(kr.target*krAutoProgress(kr.id)/100) }
+function krProgressFor(kr) {
+  if (hasKRLinkedProjects(kr.id)) return krAutoProgress(kr.id)
+  if (!kr.target||kr.target===0) return 0; return Math.min(100,(kr.current/kr.target)*100)
 }
-
-// 获取指定 KR 关联的所有待办
-function getKRTodos(objId, krId) {
-  const projs = getKRProjects(objId, krId)
-  const pids = new Set(projs.map(p => p.id))
-  return allTodos.value.filter(t => pids.has(t.project_id))
-}
-
-// 指定 KR 是否有任何关联项目（检测 kr_refs）
-function hasKRLinkedProjects(objId, krId) {
-  return getKRProjects(objId, krId).length > 0
-}
-
-// 指定 KR 关联待办完成数
-function getKRTodoDone(objId, krId) {
-  return getKRTodos(objId, krId).filter(t => t.status === 'completed').length
-}
-
-// 指定 KR 关联待办总数
-function getKRTodoTotal(objId, krId) {
-  return getKRTodos(objId, krId).length
-}
-
-// KR 自动计算进度百分比（来自关联项目待办）
-function krAutoProgress(objId, krId) {
-  const todos = getKRTodos(objId, krId)
-  if (todos.length === 0) return 0
-  return Math.round((todos.filter(t => t.status === 'completed').length / todos.length) * 100)
-}
-
-// KR 自动计算的当前值
-function krAutoValue(objId, kr) {
-  return Math.round(kr.target * krAutoProgress(objId, kr.id) / 100)
-}
-
-// KR 进度：自动模式用关联待办计算，手动模式用 kr.current
-function krProgressFor(objId, kr) {
-  if (hasKRLinkedProjects(objId, kr.id)) {
-    return krAutoProgress(objId, kr.id)
-  }
-  // 手动模式：kr.current / kr.target
-  if (!kr.target || kr.target === 0) return 0
-  return Math.min(100, (kr.current / kr.target) * 100)
-}
-
-// Objective 进度（所有 KR 平均）
 function objProgress(obj) {
-  const krs = obj.key_results || []
-  if (krs.length === 0) return obj.status === 'completed' ? 100 : 0
-  const sum = krs.reduce((s, kr) => s + krProgressFor(obj.id, kr), 0)
-  return Math.round(sum / krs.length)
+  const krs = obj.key_results||[]; if (krs.length===0) return obj.status==='completed'?100:0
+  return Math.round(krs.reduce((s,kr)=>s+krProgressFor(kr),0)/krs.length)
 }
+function getObjProjects(objId) { return allProjects.value.filter(p=>(p.kr_ids||[]).some(kid=>krObjMap.value[kid]===objId)) }
+function getObjTodoDone(objId) { const pids=new Set(getObjProjects(objId).map(p=>p.id)); return allTodos.value.filter(t=>pids.has(t.project_id)&&t.status==='completed').length }
+function getObjTodoTotal(objId) { const pids=new Set(getObjProjects(objId).map(p=>p.id)); return allTodos.value.filter(t=>pids.has(t.project_id)).length }
 
-// ===== 关联项目总览 =====
+const filteredOKRs = computed(()=>filterQuarter.value?okrs.value.filter(o=>o.quarter===filterQuarter.value):okrs.value)
+const completedCount = computed(()=>okrs.value.filter(o=>o.status==='completed').length)
+const activeCount = computed(()=>okrs.value.filter(o=>o.status==='active').length)
+const overallProgress = computed(()=>{if(!okrs.value.length)return 0;return Math.round(okrs.value.reduce((s,o)=>s+objProgress(o),0)/okrs.value.length)})
 
-function getLinkedProjects(objId) {
-  return allProjects.value.filter(p => (p.okr_ids || []).includes(objId))
+const statusClass = s=>({active:'bg-blue-100 text-blue-700',completed:'bg-green-100 text-green-700',paused:'bg-gray-100 text-gray-600'}[s]||'bg-gray-100 text-gray-600')
+const statusLabel = s=>({active:'进行中',completed:'已完成',paused:'暂停'}[s]||s)
+const progressColor = p=>{if(p>=80)return'bg-green-500';if(p>=40)return'bg-blue-500';if(p>=20)return'bg-yellow-500';return'bg-red-400'}
+const krProgressColor = p=>{if(p>=80)return'#22c55e';if(p>=40)return'#3b82f6';if(p>=20)return'#eab308';return'#f87171'}
+
+const openAddObj = ()=>{editingObj.value={id:null,title:'',description:'',quarter:availableQuarters.value[0]||'',status:'active',key_results:[]};showObjModal.value=true}
+const editObj = o=>{editingObj.value=JSON.parse(JSON.stringify(o));showObjModal.value=true}
+const saveObj = ()=>{
+  if(!editingObj.value.title.trim()){alert('请输入目标标题');return}
+  const i=okrs.value.findIndex(o=>o.id===editingObj.value.id)
+  if(i!==-1)okrs.value[i]={...editingObj.value}
+  else okrs.value.push({...editingObj.value,id:Math.max(...okrs.value.map(o=>o.id),0)+1})
+  showObjModal.value=false;persist()
 }
-
-// 一个项目在这个 Objective 下关联了哪些 KR
-function getProjectKRRefs(pid, objId) {
-  const proj = allProjects.value.find(p => p.id === pid)
-  if (!proj) return []
-  return (proj.kr_refs || [])
-    .filter(ref => ref.startsWith(`${objId}-`))
-    .map(ref => ref.split('-')[1])
+const deleteObj = id=>{if(!id||!confirm('确定删除此目标？'))return;okrs.value=okrs.value.filter(o=>o.id!==id);showObjModal.value=false;persist()}
+const openAddKR = obj=>{editingObjForKR.value=obj;editingKR.value={id:'',title:'',current:0,target:100,unit:'%'};showKRModal.value=true}
+const editKRForObj = (obj,kr)=>{editingObjForKR.value=obj;editingKR.value={...kr};showKRModal.value=true}
+const saveKR = ()=>{
+  if(!editingKR.value.title.trim()){alert('请输入关键结果');return}
+  const obj=editingObjForKR.value;if(!obj.key_results)obj.key_results=[]
+  const i=obj.key_results.findIndex(k=>k.id===editingKR.value.id)
+  if(i!==-1)obj.key_results[i]={...editingKR.value}
+  else{let mn=0;for(const o of okrs.value)for(const k of(o.key_results||[])){const m=k.id.match(/^K(\d+)$/);if(m)mn=Math.max(mn,Number(m[1]))};obj.key_results.push({...editingKR.value,id:`K${String(mn+1).padStart(3,'0')}`})}
+  const oi=okrs.value.findIndex(o=>o.id===obj.id);if(oi!==-1)okrs.value[oi]=JSON.parse(JSON.stringify(obj))
+  showKRModal.value=false;persist()
 }
-
-// Objective 级别：所有关联项目中的待办汇总
-function getObjTodoDone(objId) {
-  const projs = getLinkedProjects(objId)
-  const pids = new Set(projs.map(p => p.id))
-  return allTodos.value.filter(t => pids.has(t.project_id) && t.status === 'completed').length
-}
-function getObjTodoTotal(objId) {
-  const projs = getLinkedProjects(objId)
-  const pids = new Set(projs.map(p => p.id))
-  return allTodos.value.filter(t => pids.has(t.project_id)).length
-}
-
-// ===== 筛选与统计 =====
-
-const filteredOKRs = computed(() => {
-  if (!filterQuarter.value) return okrs.value
-  return okrs.value.filter(o => o.quarter === filterQuarter.value)
-})
-
-const completedCount = computed(() => okrs.value.filter(o => o.status === 'completed').length)
-const activeCount = computed(() => okrs.value.filter(o => o.status === 'active').length)
-
-const overallProgress = computed(() => {
-  if (okrs.value.length === 0) return 0
-  const sum = okrs.value.reduce((s, o) => s + objProgress(o), 0)
-  return Math.round(sum / okrs.value.length)
-})
-
-// ===== 样式辅助 =====
-
-const statusClass = (s) => ({
-  active: 'bg-blue-100 text-blue-700',
-  completed: 'bg-green-100 text-green-700',
-  paused: 'bg-gray-100 text-gray-600'
-}[s] || 'bg-gray-100 text-gray-600')
-
-const statusLabel = (s) => ({ active: '进行中', completed: '已完成', paused: '暂停' }[s] || s)
-
-const progressColor = (p) => {
-  if (p >= 80) return 'bg-green-500'
-  if (p >= 40) return 'bg-blue-500'
-  if (p >= 20) return 'bg-yellow-500'
-  return 'bg-red-400'
-}
-
-const krProgressColor = (p) => {
-  if (p >= 80) return '#22c55e'
-  if (p >= 40) return '#3b82f6'
-  if (p >= 20) return '#eab308'
-  return '#f87171'
-}
-
-// ===== Object 操作 =====
-
-const openAddObj = () => {
-  editingObj.value = {
-    id: null,
-    title: '',
-    description: '',
-    quarter: availableQuarters.value[0] || '',
-    status: 'active',
-    key_results: []
-  }
-  showObjModal.value = true
-}
-
-const editObj = (obj) => {
-  editingObj.value = JSON.parse(JSON.stringify(obj))
-  showObjModal.value = true
-}
-
-const saveObj = () => {
-  if (!editingObj.value.title.trim()) {
-    alert('请输入目标标题')
-    return
-  }
-  const idx = okrs.value.findIndex(o => o.id === editingObj.value.id)
-  if (idx !== -1) {
-    okrs.value[idx] = { ...editingObj.value }
-  } else {
-    const maxId = Math.max(...okrs.value.map(o => o.id), 0)
-    okrs.value.push({ ...editingObj.value, id: maxId + 1 })
-  }
-  showObjModal.value = false
-  persist()
-}
-
-const deleteObj = (id) => {
-  if (!id) return
-  if (confirm('确定删除此目标及其所有关键结果？')) {
-    okrs.value = okrs.value.filter(o => o.id !== id)
-    showObjModal.value = false
-    persist()
-  }
-}
-
-// ===== KR 操作 =====
-
-const openAddKR = (obj) => {
-  editingObjForKR.value = obj
-  editingKR.value = { id: null, title: '', current: 0, target: 100, unit: '%' }
-  showKRModal.value = true
-}
-
-const editKRForObj = (obj, kr) => {
-  editingObjForKR.value = obj
-  editingKR.value = { ...kr }
-  showKRModal.value = true
-}
-
-const saveKR = () => {
-  if (!editingKR.value.title.trim()) {
-    alert('请输入关键结果')
-    return
-  }
-  const obj = editingObjForKR.value
-  if (!obj.key_results) obj.key_results = []
-
-  const idx = obj.key_results.findIndex(k => k.id === editingKR.value.id)
-  if (idx !== -1) {
-    obj.key_results[idx] = { ...editingKR.value }
-  } else {
-    const maxId = Math.max(...obj.key_results.map(k => k.id), 0)
-    obj.key_results.push({ ...editingKR.value, id: maxId + 1 })
-  }
-  // 同步到 okrs 数组
-  const objIdx = okrs.value.findIndex(o => o.id === obj.id)
-  if (objIdx !== -1) okrs.value[objIdx] = JSON.parse(JSON.stringify(obj))
-  showKRModal.value = false
-  persist()
-}
-
-const saveKRProgress = (obj) => {
-  const objIdx = okrs.value.findIndex(o => o.id === obj.id)
-  if (objIdx !== -1) okrs.value[objIdx] = JSON.parse(JSON.stringify(obj))
-  persist()
-}
-
-// ===== 持久化 =====
-const persist = () => {
-  localStorage.setItem('life-os-okrs', JSON.stringify(okrs.value))
-}
+const persist = ()=>localStorage.setItem('life-os-okrs',JSON.stringify(okrs.value))
 </script>
