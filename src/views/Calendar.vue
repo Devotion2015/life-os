@@ -31,9 +31,18 @@
               <input v-model="editingEvent.end_time" type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
             </div>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">地点</label>
-            <input v-model="editingEvent.location" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="如: 教A-301" />
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">地点</label>
+              <input v-model="editingEvent.location" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="如: 教A-301" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">关联项目</label>
+              <select v-model="editingEvent.project_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                <option :value="null">不关联</option>
+                <option v-for="p in projectList" :key="p.id" :value="p.id">{{ p.name }}</option>
+              </select>
+            </div>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">备注</label>
@@ -199,7 +208,7 @@
           @click="editEvent(evt)">
           <div class="w-2 h-full min-h-[40px] rounded-full flex-shrink-0" :class="categoryColor(evt.category, 'dot')"></div>
           <div class="flex-1 min-w-0">
-            <div class="font-medium text-gray-800">{{ evt.title }}</div>
+            <div class="font-medium text-gray-800 flex items-center gap-1.5">{{ evt.title }}<span v-if="evt.project_id" class="text-[11px] bg-indigo-100 text-indigo-600 px-1 rounded">{{ getProjectName(evt.project_id) }}</span></div>
             <div class="flex flex-wrap items-center gap-2 mt-1 text-xs text-gray-500">
               <span v-if="evt.start_time">🕐 {{ evt.start_time }}{{ evt.end_time ? ' - ' + evt.end_time : '' }}</span>
               <span v-if="evt.location">📍 {{ evt.location }}</span>
@@ -254,6 +263,11 @@ const categoryColor = (cat, key) => {
 const categoryLabel = (cat) => {
   const c = catMap[cat] || catMap['其他']
   return c.emoji + ' ' + c.label
+}
+
+const getProjectName = (pid) => {
+  const p = projectList.value.find(p => p.id === pid)
+  return p ? (p.name.length > 8 ? p.name.slice(0, 8) + '…' : p.name) : pid
 }
 
 // 加载数据：优先 localStorage，首次从 JSON 导入
@@ -474,7 +488,8 @@ const openAddModal = () => {
     start_time: '',
     end_time: '',
     location: '',
-    description: ''
+    description: '',
+    project_id: null
   }
   isEditing.value = false
   showEventModal.value = true
@@ -489,7 +504,8 @@ const openAddForDate = () => {
     start_time: '',
     end_time: '',
     location: '',
-    description: ''
+    description: '',
+    project_id: null
   }
   isEditing.value = false
   showEventModal.value = true

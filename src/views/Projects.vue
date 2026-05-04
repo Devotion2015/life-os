@@ -121,7 +121,7 @@
         <h3 class="font-semibold text-gray-700 mb-3">📌 规划中 ({{ filteredByStatus('planning').length }})</h3>
         <div v-if="filteredByStatus('planning').length === 0" class="text-center py-6 text-gray-400 text-sm">暂无项目</div>
         <ProjectCard v-for="p in filteredByStatus('planning')" :key="p.id" :project="p"
-          :todos="projectTodos(p)" :krMap="krNameMap"
+          :todos="projectTodos(p)" :krMap="krNameMap" :nextSession="nextSessionFor(p.id)"
           @edit="editProject" @delete="deleteProject" @toggle-todo="toggleTodoStatus"
           @add-todo="addTodoToProject" @quick-move="moveTo(p, $event)" />
       </div>
@@ -130,7 +130,7 @@
         <h3 class="font-semibold text-gray-700 mb-3">🚀 进行中 ({{ filteredByStatus('active').length }})</h3>
         <div v-if="filteredByStatus('active').length === 0" class="text-center py-6 text-gray-400 text-sm">暂无项目</div>
         <ProjectCard v-for="p in filteredByStatus('active')" :key="p.id" :project="p"
-          :todos="projectTodos(p)" :krMap="krNameMap" :showProgress="true"
+          :todos="projectTodos(p)" :krMap="krNameMap" :showProgress="true" :nextSession="nextSessionFor(p.id)"
           @edit="editProject" @delete="deleteProject" @toggle-todo="toggleTodoStatus"
           @add-todo="addTodoToProject" @quick-move="moveTo(p, $event)" />
       </div>
@@ -176,7 +176,7 @@ import { ref, computed, onMounted, h } from 'vue'
 
 // ==================== ProjectCard 组件 ====================
 const ProjectCard = {
-  props: { project: Object, todos: Array, krMap: Object, showProgress: { type: Boolean, default: false } },
+  props: { project: Object, todos: Array, krMap: Object, showProgress: { type: Boolean, default: false }, nextSession: Object },
   emits: ['edit', 'delete', 'toggle-todo', 'add-todo', 'quick-move'],
   setup(props, { emit }) {
     const expanded = ref(false); const newText = ref(''); const visibleCount = 3
@@ -215,6 +215,11 @@ const ProjectCard = {
             h('div', { class: 'w-full bg-gray-200 rounded-full h-1.5' }, [h('div', { class: `h-1.5 rounded-full transition-all duration-300 ${pc(pct)}`, style: { width: `${pct}%` } })])
           ])
         ] : null,
+        // 下次工作时段
+        props.nextSession ? h('div', { class: 'mt-1.5 pt-1.5 border-t border-gray-100' }, [
+          h('span', { class: 'text-[10px] text-indigo-600 block truncate' }, `📅 下次: ${props.nextSession.date} ${props.nextSession.title}`)
+        ]) : null,
+        // 待办列表
         todos.length > 0 ? h('div', { class: 'mt-1.5 pt-1.5 border-t border-gray-100 space-y-0.5' }, [
           ...visibleTodos.value.map(todo => h('div', { class: 'flex items-center gap-2 py-1 cursor-pointer hover:bg-gray-50 rounded px-1 -mx-1', onClick: () => emit('toggle-todo', todo) }, [
             h('span', { class: `w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center text-[10px] ${todo.status === 'completed' ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300'}` }, todo.status === 'completed' ? '✓' : ''),
@@ -240,7 +245,7 @@ const ProjectCard = {
 }
 
 // ==================== 主组件 ====================
-const projects = ref([]); const okrs = ref([]); const allTodos = ref([])
+const projects = ref([]); const okrs = ref([]); const allTodos = ref([]); const allEvents = ref([])
 const filterType = ref('all'); const filterStatus = ref('all'); const searchText = ref('')
 const showModal = ref(false); const editingProject = ref({})
 
@@ -257,9 +262,15 @@ onMounted(async () => {
   if (st) allTodos.value = JSON.parse(st); else { try { const r = await fetch('/life-os/data/todos.json'); if (r.ok) allTodos.value = await r.json() } catch (e) {} }
   const so = localStorage.getItem('life-os-okrs')
   if (so) okrs.value = JSON.parse(so); else { try { const r = await fetch('/life-os/data/okr.json'); if (r.ok) okrs.value = await r.json() } catch (e) {} }
+  const se = localStorage.getItem('life-os-events')
+  if (se) allEvents.value = JSON.parse(se); else { try { const r = await fetch('/life-os/data/events.json'); if (r.ok) allEvents.value = await r.json() } catch (e) {} }
 })
 
 function projectTodos(p) { return allTodos.value.filter(t => t.project_id === p.id) }
+function nextSessionFor(pid) {
+  const now = new Date().toISOString().split('T')[0]
+  return allEvents.value.filter(e => e.project_id === pid && e.date >= now).sort((a, b) => a.date.localeCompare(b.date))[0] || null
+}
 const totalTodos = computed(() => { const ids = new Set(projects.value.map(p => p.id)); return allTodos.value.filter(t => ids.has(t.project_id)).length })
 const totalKRs = computed(() => { const set = new Set(); projects.value.forEach(p => (p.kr_ids || []).forEach(id => set.add(id))); return set.size })
 const activeCount = computed(() => projects.value.filter(p => p.status === 'active').length)
