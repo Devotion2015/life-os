@@ -227,6 +227,7 @@ import { ref, computed, onMounted } from 'vue'
 
 // 状态
 const events = ref([])
+const projectList = ref([])
 const currentView = ref('month')
 const currentDate = ref(new Date())
 const selectedDate = ref(null)
@@ -282,6 +283,16 @@ onMounted(async () => {
     } catch (e) {
       console.error('加载日程数据失败', e)
     }
+  }
+  // 加载项目列表供关联选择
+  const sp = localStorage.getItem('life-os-projects')
+  if (sp) {
+    projectList.value = JSON.parse(sp)
+  } else {
+    try {
+      const r = await fetch('/life-os/data/projects.json')
+      if (r.ok) projectList.value = await r.json()
+    } catch (e) {}
   }
 })
 
