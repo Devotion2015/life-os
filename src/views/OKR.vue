@@ -158,7 +158,7 @@
               <div class="flex-1 min-w-0">
                 <div class="flex items-start justify-between gap-2">
                   <span class="text-sm text-gray-700 font-medium">{{ kr.title }}</span>
-                  <div class="flex items-center gap-0.5 opacity-0 hover:opacity-100 transition-all flex-shrink-0">
+                  <div class="flex items-center gap-0.5 flex-shrink-0">
                     <button @click="editKRForObj(obj, kr)" class="p-0.5 text-gray-300 hover:text-blue-500 rounded" title="编辑">✎</button>
                     <button @click="deleteKR(obj, kr)" class="p-0.5 text-gray-300 hover:text-red-500 rounded" title="删除">✕</button>
                   </div>
