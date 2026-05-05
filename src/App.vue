@@ -101,7 +101,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import LoginGate from './components/LoginGate.vue'
-import { hashKey, AUTH_KEY } from './config.js'
+import { AUTH_HASH } from './config.js'
 
 // 认证状态：null=加载中 / false=未登录 / true=已登录
 const authenticated = ref(null)
@@ -123,39 +123,18 @@ const navItems = [
   { path: '/life', icon: '🎮', label: '娱乐生活' },
 ]
 
-onMounted(async () => {
+onMounted(() => {
   // 恢复侧边栏折叠状态
   const saved = localStorage.getItem('life-os-sidebar-collapsed')
   if (saved !== null) {
     sidebarCollapsed.value = saved === 'true'
   }
 
-  // 认证检查
-  try {
-    const expectedHash = await hashKey(AUTH_KEY)
-
-    // 1) URL 参数扫码登录
-    const params = new URLSearchParams(window.location.search)
-    const urlKey = params.get('key')
-    if (urlKey) {
-      const inputHash = await hashKey(urlKey)
-      if (inputHash === expectedHash) {
-        localStorage.setItem('life-os-auth', expectedHash)
-        window.history.replaceState({}, '', window.location.pathname)
-        authenticated.value = true
-        return
-      }
-    }
-
-    // 2) localStorage 已有 token
-    const stored = localStorage.getItem('life-os-auth')
-    if (stored === expectedHash) {
-      authenticated.value = true
-      return
-    }
-
-    authenticated.value = false
-  } catch {
+  // 认证检查：localStorage 已有 token
+  const stored = localStorage.getItem('life-os-auth')
+  if (stored === AUTH_HASH) {
+    authenticated.value = true
+  } else {
     authenticated.value = false
   }
 })
