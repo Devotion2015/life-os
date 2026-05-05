@@ -93,7 +93,9 @@
         <h1 class="text-lg font-bold text-gray-800">🚪 阿财的任意门</h1>
       </div>
 
-      <router-view></router-view>
+      <!-- 同步状态栏 -->
+      <SyncPanel :localVersion="syncLocalVersion" @refresh="refreshAllData" />
+      <router-view @refresh-data="refreshAllData"></router-view>
     </main>
   </div>
 </template>
@@ -101,6 +103,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import LoginGate from './components/LoginGate.vue'
+import SyncPanel from './components/SyncPanel.vue'
 import { AUTH_HASH } from './config.js'
 
 // 认证状态：null=加载中 / false=未登录 / true=已登录
@@ -145,6 +148,39 @@ watch(sidebarCollapsed, (val) => {
 
 function toggleCollapse() {
   sidebarCollapsed.value = !sidebarCollapsed.value
+}
+
+// ── 同步版本号 ──────────────────────────────────
+const syncLocalVersion = ref(0)
+onMounted(() => {
+  const v = localStorage.getItem('life-os-data-version')
+  if (v) syncLocalVersion.value = Number(v)
+  // 没有版本号 = 首次加载，设为当前 sync-status 版本
+  if (!v) {
+    fetch('/life-os/data/sync-status.json')
+      .then(r => r.json())
+      .then(d => {
+        syncLocalVersion.value = d.dataVersion || 1
+        localStorage.setItem('life-os-data-version', String(d.dataVersion || 1))
+      })
+      .catch(() => {})
+  }
+})
+
+function refreshAllData() {
+  // 清除 localStorage 中的所有数据缓存，让页面从 JSON 重新加载
+  const keys = ['life-os-todos', 'life-os-projects', 'life-os-okrs', 'life-os-events',
+    'life-os-finance', 'life-os-knowledge', 'life-os-life']
+  keys.forEach(k => localStorage.removeItem(k))
+  // 更新本地版本号
+  fetch('/life-os/data/sync-status.json')
+    .then(r => r.json())
+    .then(d => {
+      syncLocalVersion.value = d.dataVersion
+      localStorage.setItem('life-os-data-version', String(d.dataVersion))
+      window.location.reload()
+    })
+    .catch(() => window.location.reload())
 }
 
 function onNavClick() {

@@ -26,6 +26,18 @@
       </div>
     </div>
 
+    <!-- Notion 同步状态 -->
+    <div class="bg-white rounded-lg shadow p-3 mb-6 flex items-center gap-3 text-sm">
+      <span class="text-lg">🔄</span>
+      <div class="flex-1">
+        <span class="text-gray-600">Notion 同步状态</span>
+        <span class="ml-2 text-xs" :class="syncAge === 'recent' ? 'text-green-600' : syncAge === 'ok' ? 'text-yellow-600' : 'text-gray-400'">
+          {{ syncAge === 'recent' ? '✅ 最近同步' : syncAge === 'ok' ? '⏳ ' + syncDisplay : syncDisplay || '未同步' }}
+        </span>
+      </div>
+      <span class="text-xs text-gray-400">每 4 小时自动同步</span>
+    </div>
+
     <!-- 主体两栏 -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- 左栏：进行中项目 -->
@@ -134,11 +146,48 @@ const todos = ref([])
 const projects = ref([])
 const okrs = ref([])
 const events = ref([])
+const syncState = ref(null)
 
 // 今天
 const todayStr = computed(() => new Date().toISOString().split('T')[0])
 
+// Notion 同步状态（来自 sync_state.json 的 last_push）
+const syncDisplay = computed(() => {
+  if (!syncState.value) return null
+  const t = syncState.value.last_push || syncState.value.last_pull
+  if (!t) return null
+  const d = new Date(t), now = new Date()
+  const diffMs = now - d
+  const diffH = diffMs / 3600000
+  const diffM = diffMs / 60000
+  if (diffM < 5) return '刚刚'
+  if (diffH < 1) return `${Math.round(diffM)} 分钟前`
+  if (diffH < 24) return `${Math.round(diffH)} 小时前`
+  return `${Math.round(diffH / 24)} 天前`
+})
+
+const syncAge = computed(() => {
+  if (!syncDisplay.value) return 'none'
+  const t = syncState.value?.last_push || syncState.value?.last_pull
+  if (!t) return 'none'
+  const diffH = (new Date() - new Date(t)) / 3600000
+  if (diffH < 0.5) return 'recent'
+  if (diffH < 24) return 'ok'
+  return 'stale'
+})
+
 onMounted(async () => {
+  // 加载同步状态
+  try {
+    const r = await fetch('/life-os/data/sync_state.json')
+    if (r.ok) syncState.value = await r.json()
+  } catch (e) {
+    try {
+      const r2 = await fetch('/_sync_state.json')
+      if (r2.ok) syncState.value = await r2.json()
+    } catch (e2) {}
+  }
+
   // 优先 localStorage（用户最新数据），否则从 JSON 加载初始数据
   const savedTodos = localStorage.getItem('life-os-todos')
   const savedProjects = localStorage.getItem('life-os-projects')
