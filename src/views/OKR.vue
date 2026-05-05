@@ -66,6 +66,7 @@
           </div>
         </div>
         <div class="flex gap-3 mt-6 justify-end">
+          <button @click="deleteKRInModal" v-if="editingKR.id" class="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg mr-auto">删除</button>
           <button @click="showKRModal = false" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">取消</button>
           <button @click="saveKR" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">保存</button>
         </div>
@@ -157,7 +158,10 @@
               <div class="flex-1 min-w-0">
                 <div class="flex items-start justify-between gap-2">
                   <span class="text-sm text-gray-700 font-medium">{{ kr.title }}</span>
-                  <button @click="editKRForObj(obj, kr)" class="p-0.5 text-gray-300 hover:text-blue-500 opacity-0 hover:opacity-100 transition-all flex-shrink-0" title="编辑">✎</button>
+                  <div class="flex items-center gap-0.5 opacity-0 hover:opacity-100 transition-all flex-shrink-0">
+                    <button @click="editKRForObj(obj, kr)" class="p-0.5 text-gray-300 hover:text-blue-500 rounded" title="编辑">✎</button>
+                    <button @click="deleteKR(obj, kr)" class="p-0.5 text-gray-300 hover:text-red-500 rounded" title="删除">✕</button>
+                  </div>
                 </div>
                 <div v-if="hasKRLinkedProjects(kr.id)" class="mt-1.5">
                   <div class="flex items-center justify-between mb-1">
@@ -288,6 +292,20 @@ const saveKR = ()=>{
   else{let mn=0;for(const o of okrs.value)for(const k of(o.key_results||[])){const m=k.id.match(/^K(\d+)$/);if(m)mn=Math.max(mn,Number(m[1]))};obj.key_results.push({...editingKR.value,id:`K${String(mn+1).padStart(3,'0')}`})}
   const oi=okrs.value.findIndex(o=>o.id===obj.id);if(oi!==-1)okrs.value[oi]=JSON.parse(JSON.stringify(obj))
   showKRModal.value=false;persist()
+}
+const deleteKR = (obj, kr) => {
+  if (!confirm(`确定删除「${kr.title}」？`)) return
+  obj.key_results = (obj.key_results || []).filter(k => k.id !== kr.id)
+  const oi = okrs.value.findIndex(o => o.id === obj.id)
+  if (oi !== -1) okrs.value[oi] = JSON.parse(JSON.stringify(obj))
+  persist()
+}
+const deleteKRInModal = () => {
+  if (!editingKR.value.id) return
+  const obj = editingObjForKR.value
+  if (!obj) return
+  deleteKR(obj, { id: editingKR.value.id, title: editingKR.value.title })
+  showKRModal.value = false
 }
 const persist = ()=>localStorage.setItem('life-os-okrs',JSON.stringify(okrs.value))
 </script>
