@@ -4,14 +4,14 @@
     "name": "信息技术教案制作",
     "type": "teaching",
     "status": "active",
-    "deadline": null,
+    "deadline": "2026-06-30",
     "tasks": [],
     "kr_ids": []
   },
   {
     "id": "P002",
-    "name": "bird-knowledge",
-    "type": "personal",
+    "name": "公众号2026运营",
+    "type": "content",
     "status": "active",
     "deadline": null,
     "tasks": [],
@@ -28,42 +28,6 @@
   },
   {
     "id": "P004",
-    "name": "公众号2026运营",
-    "type": "content",
-    "status": "active",
-    "deadline": null,
-    "tasks": [],
-    "kr_ids": []
-  },
-  {
-    "id": "P005",
-    "name": "题库构建",
-    "type": "teaching",
-    "status": "planning",
-    "deadline": null,
-    "tasks": [],
-    "kr_ids": []
-  },
-  {
-    "id": "P006",
-    "name": "信息技术教案制作",
-    "type": "teaching",
-    "status": "active",
-    "deadline": "2026-06-30",
-    "tasks": [],
-    "kr_ids": []
-  },
-  {
-    "id": "P007",
-    "name": "公众号2026运营",
-    "type": "content",
-    "status": "active",
-    "deadline": null,
-    "tasks": [],
-    "kr_ids": []
-  },
-  {
-    "id": "P008",
     "name": "课堂测验题库构建",
     "type": "teaching",
     "status": "planning",
@@ -72,7 +36,7 @@
     "kr_ids": []
   },
   {
-    "id": "P009",
+    "id": "P005",
     "name": "bird-knowledge 鸟类科普站",
     "type": "personal",
     "status": "active",

@@ -2,6 +2,18 @@
   "media": [
     {
       "id": "M001",
+      "title": "流人 (Slow Horses) S4",
+      "type": "tv",
+      "status": "want_to_watch",
+      "progress": "",
+      "rating": 0,
+      "notes": "听说回归水准了",
+      "startDate": null,
+      "completedDate": null,
+      "tags": []
+    },
+    {
+      "id": "M002",
       "title": "三体",
       "type": "tv",
       "status": "watching",
@@ -13,7 +25,7 @@
       "tags": []
     },
     {
-      "id": "M002",
+      "id": "M003",
       "title": "奥本海默",
       "type": "movie",
       "status": "completed",
@@ -25,25 +37,13 @@
       "tags": []
     },
     {
-      "id": "M003",
+      "id": "M004",
       "title": "鬼灭之刃 柱训练篇",
       "type": "anime",
       "status": "watching",
       "progress": "",
       "rating": 0,
       "notes": "制作依然精良",
-      "startDate": null,
-      "completedDate": null,
-      "tags": []
-    },
-    {
-      "id": "M004",
-      "title": "三体(剧集)",
-      "type": "tv",
-      "status": "watching",
-      "progress": "",
-      "rating": 0,
-      "notes": "",
       "startDate": null,
       "completedDate": null,
       "tags": []
@@ -62,60 +62,12 @@
     },
     {
       "id": "M006",
-      "title": "流人 (Slow Horses) S4",
-      "type": "tv",
-      "status": "want_to_watch",
-      "progress": "",
-      "rating": 0,
-      "notes": "听说回归水准了",
-      "startDate": null,
-      "completedDate": null,
-      "tags": []
-    },
-    {
-      "id": "M007",
       "title": "沙丘2",
       "type": "movie",
       "status": "want_to_watch",
       "progress": "",
       "rating": 0,
       "notes": "等上线再看",
-      "startDate": null,
-      "completedDate": null,
-      "tags": []
-    },
-    {
-      "id": "M008",
-      "title": "流浪地球3",
-      "type": "movie",
-      "status": "want_to_watch",
-      "progress": "",
-      "rating": 0,
-      "notes": "",
-      "startDate": null,
-      "completedDate": null,
-      "tags": []
-    },
-    {
-      "id": "M009",
-      "title": "葬送的芙莉莲",
-      "type": "anime",
-      "status": "completed",
-      "progress": "",
-      "rating": 0,
-      "notes": "",
-      "startDate": null,
-      "completedDate": null,
-      "tags": []
-    },
-    {
-      "id": "M010",
-      "title": "我们的星球",
-      "type": "documentary",
-      "status": "completed",
-      "progress": "",
-      "rating": 0,
-      "notes": "",
       "startDate": null,
       "completedDate": null,
       "tags": []
