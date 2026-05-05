@@ -34,6 +34,16 @@
         >
           🔄 刷新数据
         </button>
+        <button
+          @click="triggerSync"
+          class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg transition-colors font-medium flex items-center gap-1"
+          :disabled="syncing"
+          title="触发云端双向同步"
+        >
+          <span v-if="syncing" class="inline-block animate-spin">⏳</span>
+          <span v-else>🔄</span>
+          {{ syncing ? '同步中…' : '立即同步' }}
+        </button>
         <a
           href="https://www.notion.so/Life-OS-3574fad8114a80489668d29ddc8a3eb4"
           target="_blank"
@@ -69,6 +79,9 @@ const props = defineProps({
 defineEmits(['refresh'])
 
 const status = ref({ lastSync: null, dataVersion: 0, source: '—' })
+const syncing = ref(false)
+
+const GITHUB_ACTIONS_URL = 'https://github.com/Devotion2015/life-os/actions/workflows/sync-notion.yml'
 
 // 版本号大于本地 = 有新数据
 const hasUpdate = computed(() =>
@@ -83,6 +96,14 @@ onMounted(async () => {
     // sync-status 不存在则保持默认
   }
 })
+
+function triggerSync() {
+  syncing.value = true
+  // 打开 GitHub Actions 手动触发页面
+  window.open(GITHUB_ACTIONS_URL, '_blank', 'noopener')
+  // 3秒后恢复按钮状态
+  setTimeout(() => { syncing.value = false }, 3000)
+}
 
 function fmtTime(iso) {
   if (!iso) return '—'
