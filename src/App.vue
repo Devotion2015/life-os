@@ -1,5 +1,14 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <!-- 未登录 → 登录门 -->
+  <LoginGate v-if="authenticated === false" @login="authenticated = true" />
+
+  <!-- 加载中 -->
+  <div v-else-if="authenticated === null" class="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div class="text-gray-400 text-lg">⏳ 加载中...</div>
+  </div>
+
+  <!-- 已登录 → 完整应用 -->
+  <div v-else class="min-h-screen bg-gray-50">
     <!-- Mobile: backdrop overlay -->
     <div
       v-if="sidebarOpen"
@@ -91,6 +100,11 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
+import LoginGate from './components/LoginGate.vue'
+import { hashKey, AUTH_KEY } from './config.js'
+
+// 认证状态：null=加载中 / false=未登录 / true=已登录
+const authenticated = ref(null)
 
 // 移动端：抽屉打开/关闭
 const sidebarOpen = ref(false)
@@ -109,10 +123,40 @@ const navItems = [
   { path: '/life', icon: '🎮', label: '娱乐生活' },
 ]
 
-onMounted(() => {
+onMounted(async () => {
+  // 恢复侧边栏折叠状态
   const saved = localStorage.getItem('life-os-sidebar-collapsed')
   if (saved !== null) {
     sidebarCollapsed.value = saved === 'true'
+  }
+
+  // 认证检查
+  try {
+    const expectedHash = await hashKey(AUTH_KEY)
+
+    // 1) URL 参数扫码登录
+    const params = new URLSearchParams(window.location.search)
+    const urlKey = params.get('key')
+    if (urlKey) {
+      const inputHash = await hashKey(urlKey)
+      if (inputHash === expectedHash) {
+        localStorage.setItem('life-os-auth', expectedHash)
+        window.history.replaceState({}, '', window.location.pathname)
+        authenticated.value = true
+        return
+      }
+    }
+
+    // 2) localStorage 已有 token
+    const stored = localStorage.getItem('life-os-auth')
+    if (stored === expectedHash) {
+      authenticated.value = true
+      return
+    }
+
+    authenticated.value = false
+  } catch {
+    authenticated.value = false
   }
 })
 
@@ -125,7 +169,6 @@ function toggleCollapse() {
 }
 
 function onNavClick() {
-  // 移动端点击导航后自动关闭侧边栏
   sidebarOpen.value = false
 }
 </script>
