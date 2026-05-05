@@ -35,7 +35,7 @@
           🔄 刷新数据
         </button>
         <a
-          href="https://www.notion.so/Life-OS-3574fad8-114a-8048-9668-d29ddc8a3eb4"
+          href="https://www.notion.so/Life-OS-3574fad8114a80489668d29ddc8a3eb4"
           target="_blank"
           rel="noopener"
           class="text-xs text-gray-400 hover:text-gray-600 transition-colors"
