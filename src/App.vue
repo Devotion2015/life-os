@@ -71,7 +71,7 @@
       :class="{ 'lg:!ml-16': sidebarCollapsed }"
     >
       <!-- 移动端顶部栏 -->
-      <div class="lg:hidden mb-4 flex items-center gap-3">
+      <div class="lg:hidden sticky top-0 z-30 bg-gray-50 pb-3 pt-2 -mx-4 px-4 flex items-center gap-3">
         <button
           @click="sidebarOpen = true"
           class="p-2 text-gray-600 hover:bg-gray-200 rounded-lg transition-colors"
