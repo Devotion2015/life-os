@@ -100,6 +100,17 @@ def write_sync_status(updated_categories):
         json.dump(rec, f, ensure_ascii=False, indent=2)
     return rec
 
+def get_existing_titles(db_id):
+    """返回数据库中所有页面的标题集合 — 用于 Push 去重。"""
+    pages = list_notion_pages(db_id)
+    titles = set()
+    for p in pages:
+        t = p.get('properties', {}).get('Name', {}).get('title', [{}])[0].get('text', {}).get('content', '')
+        if t:
+            titles.add(t)
+    return titles
+
+
 def list_notion_pages(db_id):
     """分页拉取数据库中所有 page（data_source query）。"""
     pages = []
@@ -135,13 +146,21 @@ def push_projects(state):
     status_map = {'active': '🚀 进行中', 'planning': '📋 规划中', 'completed': '✅ 已完成', 'paused': '⏸️ 暂停'}
     type_map = {'teaching': '教学', 'content': '公众号', 'personal': '个人', 'research': '科研', 'programming': '编程'}
 
+    existing = get_existing_titles(db_id)
     for proj in data:
+        if proj['name'] in existing:
+            print(f'  ⏭️  {proj["name"]} (已存在)')
+            continue
+        if f'project:{proj["id"]}' in state.get('mappings', {}):
+            print(f'  ⏭️  {proj["name"]} (已同步)')
+            continue
+
         total = len(proj.get('tasks', []))
         done = sum(1 for t in proj.get('tasks', []) if t.get('completed'))
         pct = round(done / total * 100) if total > 0 else 0
 
         props = {
-            'Name': {'title': [{'text': {'content': proj['name']}}]},
+            'Name': {'title': [{'text': {'content': proj['name']}}]}, 
             '状态': {'select': {'name': status_map.get(proj.get('status', ''), '🚀 进行中')}},
             '类型': {'select': {'name': type_map.get(proj.get('type', ''), '教学')}},
             '进度': {'number': pct},
@@ -172,7 +191,15 @@ def push_okrs(state):
     db_id = NOTION_DB_IDS['📊 OKR 追踪']
     area_map = {'work': '教学', 'side': '公众号', 'personal': '个人', 'research': '科研'}
 
+    existing = get_existing_titles(db_id)
     for obj in data:
+        if obj['title'] in existing:
+            print(f'  ⏭️  {obj["title"]} (已存在)')
+            continue
+        if f'okr:{obj["id"]}' in state.get('mappings', {}):
+            print(f'  ⏭️  {obj["title"]} (已同步)')
+            continue
+
         krs = obj.get('key_results', [])
         avg = round(sum(kr.get('current', 0) / max(kr.get('target', 1), 1) * 100 for kr in krs) / len(krs)) if krs else 0
         kr_text = '\n'.join(
@@ -206,9 +233,14 @@ def push_finance(state):
     cat_map = {'dining': '餐饮', 'office': '办公', 'shopping': '购物', 'entertainment': '娱乐',
                'transport': '交通', 'salary': '学习', 'books': '学习', 'housing': '居住', 'digital': '购物'}
 
+    existing = get_existing_titles(db_id)
     for tx in data.get('transactions', []):
+        if tx['description'] in existing:
+            print(f'  ⏭️  {tx["description"]} (已存在)')
+            continue
+
         props = {
-            'Name': {'title': [{'text': {'content': tx['description']}}]},
+            'Name': {'title': [{'text': {'content': tx['description']}}]}, 
             '类型': {'select': {'name': type_map.get(tx['type'], '📤 支出')}},
             '分类': {'select': {'name': cat_map.get(tx['category'], '其他')}},
             '金额': {'number': tx['amount']},
@@ -234,7 +266,12 @@ def push_reading(state):
     db_id = NOTION_DB_IDS['📚 阅读笔记']
     status_map = {'reading': '📖 在读', 'completed': '✅ 已读', 'want_to_read': '📚 想读', 'dropped': '🚫 弃读'}
 
+    existing = get_existing_titles(db_id)
     for book in data.get('readingList', []):
+        if book['title'] in existing:
+            print(f'  ⏭️  {book["title"]} (已存在)')
+            continue
+
         rating_name = ''
         if book.get('rating'):
             stars = min(book['rating'], 5)
@@ -271,7 +308,12 @@ def push_media(state):
     type_map = {'tv': '📺 剧集', 'movie': '🎬 电影', 'anime': '🐣 动漫', 'documentary': '📖 纪录片'}
     status_map = {'watching': '👀 在看', 'completed': '✅ 已看', 'want_to_watch': '🔖 想看'}
 
+    existing = get_existing_titles(db_id)
     for m in data.get('media', []):
+        if m['title'] in existing:
+            print(f'  ⏭️  {m["title"]} (已存在)')
+            continue
+
         rating_name = ''
         if m.get('rating') and isinstance(m['rating'], int) and m['rating'] >= 1:
             stars = min(m['rating'], 5)
@@ -309,9 +351,13 @@ def pull_projects():
     type_map = {'教学': 'teaching', '公众号': 'content', '编程': 'personal', '科研': 'research', '个人': 'personal'}
 
     projects = []
+    seen = {}
     for pg in pages:
         props = pg.get('properties', {})
         title = props.get('Name', {}).get('title', [{}])[0].get('text', {}).get('content', '')
+        if not title or title in seen:
+            continue
+
         status = status_map.get(props.get('状态', {}).get('select', {}).get('name', ''), 'active')
         p_type = type_map.get(props.get('类型', {}).get('select', {}).get('name', ''), 'teaching')
         progress = props.get('进度', {}).get('number', 0)
@@ -323,11 +369,14 @@ def pull_projects():
             if isinstance(inner, dict) and inner:
                 deadline = inner.get('start') or None
 
-        projects.append({
-            'id': f'P{len(projects)+1:03d}', 'name': title,
+        proj = {
+            'id': f'P{len(seen)+1:03d}', 'name': title,
             'type': p_type, 'status': status, 'deadline': deadline,
             'tasks': [], 'kr_ids': [],
-        })
+        }
+        seen[title] = proj
+
+    projects = list(seen.values())
 
     save_json('projects.json', projects)
     print(f'  ✅ 同步 {len(projects)} 个项目')
@@ -341,10 +390,13 @@ def pull_finance():
     cat_map = {'餐饮': 'dining', '办公': 'office', '购物': 'shopping', '娱乐': 'entertainment',
                '交通': 'transport', '学习': 'books', '居住': 'housing'}
 
-    txs = []
+    seen = {}
     for pg in pages:
         props = pg.get('properties', {})
         desc = props.get('Name', {}).get('title', [{}])[0].get('text', {}).get('content', '')
+        if not desc or desc in seen:
+            continue
+
         tx_type = type_map.get(props.get('类型', {}).get('select', {}).get('name', ''), 'expense')
         cat = cat_map.get(props.get('分类', {}).get('select', {}).get('name', ''), 'other')
         amt = props.get('金额', {}).get('number', 0)
@@ -356,11 +408,13 @@ def pull_finance():
             if isinstance(inner, dict) and inner:
                 dt = inner.get('start', '')
 
-        txs.append({
-            'id': f'TR{len(txs)+1:03d}', 'date': dt or '', 'type': tx_type,
+        seen[desc] = {
+            'id': f'TR{len(seen)+1:03d}', 'date': dt or '', 'type': tx_type,
             'category': cat, 'amount': amt, 'description': desc,
             'month': (dt or '')[:7],
-        })
+        }
+
+    txs = list(seen.values())
 
     finance = load_json('finance.json')
     finance['transactions'] = txs
@@ -374,10 +428,13 @@ def pull_reading():
     pages = list_notion_pages(NOTION_DB_IDS['📚 阅读笔记'])
     status_map = {'📖 在读': 'reading', '✅ 已读': 'completed', '📚 想读': 'want_to_read', '🚫 弃读': 'dropped'}
 
-    books = []
+    seen = {}
     for pg in pages:
         props = pg.get('properties', {})
         title = props.get('Name', {}).get('title', [{}])[0].get('text', {}).get('content', '')
+        if not title or title in seen:
+            continue
+
         author = ''
         rt = props.get('作者', {}).get('rich_text', [])
         if rt:
@@ -388,13 +445,15 @@ def pull_reading():
         rating = 0
         sel = props.get('评分', {}).get('select', {})
         if sel and sel.get('name'):
-            rating = len(sel['name'])  # ⭐ count
+            rating = len(sel['name'])
 
-        books.append({
-            'id': f'R{len(books)+1:03d}', 'title': title, 'author': author,
+        seen[title] = {
+            'id': f'R{len(seen)+1:03d}', 'title': title, 'author': author,
             'type': 'book', 'status': status, 'progress': progress,
             'rating': rating, 'notes': '', 'startDate': None, 'completedDate': None, 'cover': '',
-        })
+        }
+
+    books = list(seen.values())
 
     knowledge = load_json('knowledge.json')
     knowledge['readingList'] = books
@@ -410,9 +469,13 @@ def pull_media():
     status_map = {'👀 在看': 'watching', '✅ 已看': 'completed', '🔖 想看': 'want_to_watch'}
 
     media = []
+    seen = {}
     for pg in pages:
         props = pg.get('properties', {})
         title = props.get('Name', {}).get('title', [{}])[0].get('text', {}).get('content', '')
+        if not title or title in seen:
+            continue
+
         m_type = type_map.get(props.get('类型', {}).get('select', {}).get('name', ''), 'movie')
         status = status_map.get(props.get('状态', {}).get('select', {}).get('name', ''), 'want_to_watch')
         notes = ''
@@ -425,17 +488,73 @@ def pull_media():
         if sel and sel.get('name'):
             rating = len(sel['name'])
 
-        media.append({
-            'id': f'M{len(media)+1:03d}', 'title': title, 'type': m_type,
+        seen[title] = {
+            'id': f'M{len(seen)+1:03d}', 'title': title, 'type': m_type,
             'status': status, 'progress': '', 'rating': rating, 'notes': notes,
             'startDate': None, 'completedDate': None, 'tags': [],
-        })
+        }
+
+    media = list(seen.values())
 
     life = load_json('life.json')
     life['media'] = media
     save_json('life.json', life)
     print(f'  ✅ 同步 {len(media)} 部影视')
     return len(media)
+
+
+def pull_okrs():
+    """📊 OKR 追踪 → okr.json"""
+    print('\n📊 Pull: OKR → okr.json')
+    pages = list_notion_pages(NOTION_DB_IDS['📊 OKR 追踪'])
+    area_map = {'教学': 'work', '公众号': 'side', '个人': 'personal', '科研': 'research'}
+
+    import re
+    okrs = []
+    seen = {}
+    for pg in pages:
+        props = pg.get('properties', {})
+        title = props.get('Name', {}).get('title', [{}])[0].get('text', {}).get('content', '')
+        if not title or title in seen:
+            continue
+
+        area = area_map.get(props.get('领域', {}).get('select', {}).get('name', ''), 'work')
+        year = props.get('年份', {}).get('number', 2026)
+        overall = props.get('整体进度', {}).get('number', 0)
+
+        # 解析 关键结果 rich_text → 结构化
+        krs = []
+        rt = props.get('关键结果', {}).get('rich_text', [])
+        if rt:
+            kr_text = rt[0].get('text', {}).get('content', '')
+            for line in kr_text.split('\n'):
+                line = line.strip()
+                if not line:
+                    continue
+                m = re.match(r'^(\d+)\.\s+(.+?)\s+\((\d+)/(\d+)(\S+?)\)$', line)
+                if m:
+                    krs.append({
+                        'id': f'K{len(krs)+1:03d}',
+                        'title': m.group(2),
+                        'current': int(m.group(3)),
+                        'target': int(m.group(4)),
+                        'unit': m.group(5),
+                    })
+
+        seen[title] = {
+            'id': len(seen) + 1,
+            'title': title,
+            'description': '',
+            'quarter': f'{year}-Q2',
+            'status': 'active',
+            'key_results': krs,
+        }
+
+    okrs = list(seen.values())
+
+    save_json('okr.json', okrs)
+    print(f'  ✅ 同步 {len(okrs)} 个 OKR')
+    return len(okrs)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -472,6 +591,8 @@ if __name__ == '__main__':
         updated = []
         if pull_projects():
             updated.append('📋 项目')
+        if pull_okrs():
+            updated.append('📊 OKR')
         if pull_finance():
             updated.append('💰 财务')
         if pull_reading():
@@ -495,6 +616,8 @@ if __name__ == '__main__':
         updated = []
         if pull_projects():
             updated.append('📋 项目')
+        if pull_okrs():
+            updated.append('📊 OKR')
         if pull_finance():
             updated.append('💰 财务')
         if pull_reading():
