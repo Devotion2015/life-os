@@ -1,0 +1,173 @@
+{
+  "media": [
+    {
+      "id": "M001",
+      "title": "流人 (Slow Horses) S4",
+      "type": "tv",
+      "status": "want_to_watch",
+      "progress": "",
+      "rating": 0,
+      "notes": "听说回归水准了",
+      "startDate": null,
+      "completedDate": null,
+      "tags": []
+    },
+    {
+      "id": "M002",
+      "title": "三体",
+      "type": "tv",
+      "status": "watching",
+      "progress": "",
+      "rating": 0,
+      "notes": "国产科幻之光，改编得不错",
+      "startDate": null,
+      "completedDate": null,
+      "tags": []
+    },
+    {
+      "id": "M003",
+      "title": "奥本海默",
+      "type": "movie",
+      "status": "completed",
+      "progress": "",
+      "rating": 0,
+      "notes": "诺兰神作，音效震撼。科学与政治的纠缠令人深思",
+      "startDate": null,
+      "completedDate": null,
+      "tags": []
+    },
+    {
+      "id": "M004",
+      "title": "鬼灭之刃 柱训练篇",
+      "type": "anime",
+      "status": "watching",
+      "progress": "",
+      "rating": 0,
+      "notes": "制作依然精良",
+      "startDate": null,
+      "completedDate": null,
+      "tags": []
+    },
+    {
+      "id": "M005",
+      "title": "葬送的芙莉莲",
+      "type": "anime",
+      "status": "completed",
+      "progress": "",
+      "rating": 0,
+      "notes": "年度最佳！关于时间、记忆与羁绊的温柔叙事",
+      "startDate": null,
+      "completedDate": null,
+      "tags": []
+    },
+    {
+      "id": "M006",
+      "title": "沙丘2",
+      "type": "movie",
+      "status": "want_to_watch",
+      "progress": "",
+      "rating": 0,
+      "notes": "等上线再看",
+      "startDate": null,
+      "completedDate": null,
+      "tags": []
+    }
+  ],
+  "hobbies": [
+    {
+      "id": "H001",
+      "name": "跑步",
+      "category": "fitness",
+      "frequency": "3x/week",
+      "streak": 0,
+      "notes": "每周三次，每次5km",
+      "log": [
+        {
+          "date": "2026-05-03",
+          "duration": 35,
+          "notes": "5km 配速7:00",
+          "mood": "good"
+        },
+        {
+          "date": "2026-05-01",
+          "duration": 38,
+          "notes": "5km 有点累",
+          "mood": "ok"
+        },
+        {
+          "date": "2026-04-28",
+          "duration": 32,
+          "notes": "5km PB！配速6:24",
+          "mood": "great"
+        }
+      ]
+    },
+    {
+      "id": "H002",
+      "name": "阅读",
+      "category": "learning",
+      "frequency": "daily",
+      "streak": 12,
+      "notes": "每天至少读30分钟",
+      "log": [
+        {
+          "date": "2026-05-04",
+          "duration": 45,
+          "notes": "读了 Designing Data-Intensive Applications",
+          "mood": "great"
+        },
+        {
+          "date": "2026-05-03",
+          "duration": 30,
+          "notes": "读了 代码整洁之道 第7章",
+          "mood": "good"
+        }
+      ]
+    },
+    {
+      "id": "H003",
+      "name": "吉他",
+      "category": "art",
+      "frequency": "2x/week",
+      "streak": 0,
+      "notes": "自学指弹，目前练 黄昏",
+      "log": [
+        {
+          "date": "2026-04-30",
+          "duration": 60,
+          "notes": "练了前奏",
+          "mood": "good"
+        }
+      ]
+    }
+  ],
+  "goals": [
+    {
+      "id": "G001",
+      "title": "看完指环王三部曲加长版",
+      "category": "media",
+      "progress": 0,
+      "total": 3,
+      "deadline": "2026-06-30",
+      "completed": false
+    },
+    {
+      "id": "G002",
+      "title": "2026年跑量达到500km",
+      "category": "fitness",
+      "progress": 85,
+      "total": 500,
+      "deadline": "2026-12-31",
+      "completed": false
+    },
+    {
+      "id": "G003",
+      "title": "学会5首指弹吉他曲",
+      "category": "learning",
+      "progress": 1,
+      "total": 5,
+      "deadline": "2026-12-31",
+      "completed": false
+    }
+  ]
+}

@@ -16,6 +16,11 @@
         </span>
       </div>
 
+      <!-- 当前阶段提示 -->
+      <span v-if="syncing && syncPhase" class="text-[11px] text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full">
+        {{ syncPhase }}
+      </span>
+
       <!-- 来源标签 -->
       <span class="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full flex-shrink-0">
         {{ status.source || '—' }}
@@ -59,11 +64,11 @@
               ? 'bg-indigo-500 hover:bg-indigo-600 text-white'
               : 'bg-gray-100 text-gray-400 cursor-not-allowed'"
           :disabled="syncing || !hasToken"
-          :title="hasToken ? '点击立即触发同步' : '请先点击 ⚙️ 配置 Token'"
+          :title="hasToken ? '先保存本地数据到 GitHub，再触发 Notion 同步' : '请先点击 ⚙️ 配置 Token'"
         >
           <span v-if="syncing" class="inline-block animate-spin">⏳</span>
           <span v-else>🔄</span>
-          {{ syncing ? '同步中…' : (hasToken ? '立即同步' : '先配置') }}
+          {{ syncing ? syncPhase || '同步中…' : (hasToken ? '立即同步' : '先配置') }}
         </button>
 
         <!-- 设置齿轮 -->
@@ -108,7 +113,9 @@
         💡 创建 GitHub Fine-grained PAT →
         <a href="https://github.com/settings/tokens?type=beta" target="_blank"
            class="text-indigo-400 hover:underline">Settings → Developer settings → Fine-grained tokens</a><br>
-        权限仅需：<b>Repository access: Devotion2015/life-os</b> + <b>Permissions: Actions → Read and Write</b>
+        权限需要两项：<br>
+        <b>Repository access: Devotion2015/life-os</b><br>
+        <b>Permissions: Actions → Read and Write</b> + <b>Contents → Read and Write</b>
       </p>
     </div>
 
@@ -148,13 +155,25 @@ defineEmits(['refresh'])
 const status = ref({ lastSync: null, dataVersion: 0, source: '—', updated: [] })
 const syncing = ref(false)
 const syncResult = ref(null)        // 'ok' | 'err' | null
+const syncPhase = ref(null)         // 'saving' | 'triggering' | 'polling' | null
 const syncMode = ref('sync')        // 'sync' | 'push' | 'pull'
 const showSettings = ref(false)
 const tokenInput = ref('')
 
 const TOKEN_KEY = 'gh_sync_token'
 const POLL_INTERVAL = 5000          // 5s 轮询
-const MAX_POLLS = 8                 // 最多等 40s
+const MAX_POLLS = 12                // 最多等 60s（保存 GitHub 也需要时间）
+
+// ── localStorage ↔ JSON 文件映射 ──
+const FILE_MAP = {
+  'life-os-projects': 'public/data/projects.json',
+  'life-os-okrs': 'public/data/okr.json',
+  'life-os-todos': 'public/data/todos.json',
+  'life-os-events': 'public/data/events.json',
+  'life-os-finance': 'public/data/finance.json',
+  'life-os-knowledge': 'public/data/knowledge.json',
+  'life-os-entertainment': 'public/data/life.json',
+}
 
 // ── 计算属性 ──
 const hasToken = computed(() => !!localStorage.getItem(TOKEN_KEY))
@@ -164,15 +183,15 @@ const hasUpdate = computed(() =>
 )
 
 const statusTitle = computed(() => {
-  if (syncing.value) return '正在触发同步…'
-  if (syncResult.value === 'ok') return '同步已触发，等待完成…'
-  if (syncResult.value === 'err') return '同步触发失败'
+  if (syncing.value) return '正在同步…'
+  if (syncResult.value === 'ok') return '同步完成'
+  if (syncResult.value === 'err') return '同步失败'
   if (hasUpdate.value) return '有新数据可用！点击刷新按钮加载'
   return '数据已是最新'
 })
 
 const statusText = computed(() => {
-  if (syncing.value) return '触发同步…'
+  if (syncing.value) return '同步中…'
   const r = syncResult.value
   if (r === 'ok') return '同步完成 ✅'
   if (r === 'err') return '同步失败，点击重试'
@@ -206,7 +225,72 @@ function clearToken() {
   syncResult.value = null
 }
 
-// ── 一键同步 ──
+// ── UTF-8 字符串 → Base64（浏览器标准做法）──
+function utf8ToBase64(str) {
+  const bytes = new TextEncoder().encode(str)
+  let bin = ''
+  bytes.forEach(b => bin += String.fromCharCode(b))
+  return btoa(bin)
+}
+
+// ── 保存 localStorage 到 GitHub JSON 文件 ──
+async function saveLocalToGitHub(token) {
+  const saveResults = { saved: [], skipped: [], errors: [] }
+  const API_BASE = 'https://api.github.com/repos/Devotion2015/life-os/contents'
+  const HEADERS = {
+    'Authorization': `Bearer ${token}`,
+    'Accept': 'application/vnd.github+json',
+    'Content-Type': 'application/json',
+  }
+
+  for (const [lsKey, filePath] of Object.entries(FILE_MAP)) {
+    const raw = localStorage.getItem(lsKey)
+    if (!raw) {
+      saveResults.skipped.push(lsKey)
+      continue
+    }
+
+    try {
+      // 获取当前文件 SHA
+      const getResp = await fetch(`${API_BASE}/${filePath}`, { headers: HEADERS })
+      if (!getResp.ok) {
+        saveResults.errors.push({ key: lsKey, status: getResp.status, msg: `获取 ${filePath} 失败` })
+        continue
+      }
+      const fileInfo = await getResp.json()
+
+      // 格式化 JSON（美化输出）
+      const parsed = JSON.parse(raw)
+      const pretty = JSON.stringify(parsed, null, 2)
+      const base64 = utf8ToBase64(pretty)
+
+      // 提交更新
+      const putResp = await fetch(`${API_BASE}/${filePath}`, {
+        method: 'PUT',
+        headers: HEADERS,
+        body: JSON.stringify({
+          message: `sync: save ${lsKey} from Life OS web`,
+          content: base64,
+          sha: fileInfo.sha,
+          branch: 'main',
+        })
+      })
+
+      if (putResp.ok) {
+        saveResults.saved.push(lsKey)
+      } else {
+        const err = await putResp.json().catch(() => ({}))
+        saveResults.errors.push({ key: lsKey, status: putResp.status, msg: err.message || String(putResp.status) })
+      }
+    } catch (e) {
+      saveResults.errors.push({ key: lsKey, status: 0, msg: e.message })
+    }
+  }
+
+  return saveResults
+}
+
+// ── 一键同步（先存后同步）──
 async function triggerSync() {
   const token = localStorage.getItem(TOKEN_KEY)
   if (!token) {
@@ -218,7 +302,20 @@ async function triggerSync() {
   syncResult.value = null
 
   try {
-    // ① 触发 GitHub Actions workflow_dispatch
+    // ═══ 第一步：保存 localStorage 到 GitHub JSON 文件 ═══
+    syncPhase.value = '正在保存本地数据…'
+    const saveResults = await saveLocalToGitHub(token)
+
+    if (saveResults.errors.length > 0 && saveResults.saved.length === 0) {
+      // 全都失败了
+      throw new Error(`保存失败: ${saveResults.errors.map(e => e.key).join(', ')}`)
+    }
+
+    // 等待 GitHub 处理完 commit（避免 race condition）
+    await new Promise(r => setTimeout(r, 2000))
+
+    // ═══ 第二步：触发 sync-notion.yml workflow ═══
+    syncPhase.value = '正在触发同步…'
     const triggerResp = await fetch(
       'https://api.github.com/repos/Devotion2015/life-os/actions/workflows/sync-notion.yml/dispatches',
       {
@@ -236,57 +333,45 @@ async function triggerSync() {
     )
 
     if (!triggerResp.ok) {
-      const errBody = await triggerResp.text().catch(() => '')
-      if (triggerResp.status === 401) {
-        throw new Error('Token 无效，请重新设置')
-      }
-      if (triggerResp.status === 404) {
-        throw new Error('Workflow 文件未找到（sync-notion.yml）')
-      }
-      throw new Error(`API ${triggerResp.status}: ${errBody.slice(0, 80)}`)
+      if (triggerResp.status === 401) throw new Error('Token 无效，请重新设置')
+      if (triggerResp.status === 404) throw new Error('Workflow 文件未找到（sync-notion.yml）')
+      throw new Error(`API 错误 ${triggerResp.status}`)
     }
 
-    // ② 轮询等待同步完成
-    let prevVersion = status.value.dataVersion
+    // ═══ 第三步：轮询等待同步完成 ═══
+    syncPhase.value = '等待同步完成…'
+    const prevVersion = status.value.dataVersion
     let attempts = 0
 
-    const poll = () => new Promise((resolve) => {
+    await new Promise((resolve) => {
       const timer = setInterval(async () => {
         attempts++
         await loadStatus()
 
-        // 版本号变了 = 同步完成了
         if (status.value.dataVersion !== prevVersion) {
           clearInterval(timer)
-          syncResult.value = 'ok'
-          // 发事件通知父组件刷新
-          if (status.value.dataVersion > props.localVersion) {
-            // 让父组件感知；父组件通过 refresh 事件处理
-          }
-          syncing.value = false
           resolve()
           return
         }
 
         if (attempts >= MAX_POLLS) {
           clearInterval(timer)
-          // 超时也算成功（workflow 可能还在跑，但已经触发了）
-          syncResult.value = 'ok'
-          syncing.value = false
-          resolve()
+          resolve() // 超时也算已触发
         }
       }, POLL_INTERVAL)
     })
 
-    await poll()
+    syncResult.value = 'ok'
+    syncPhase.value = null
+    syncing.value = false
 
-    // 3s 后清除 ok 状态，回到正常
-    setTimeout(() => { syncResult.value = null }, 5000)
+    setTimeout(() => { syncResult.value = null }, 8000)
 
   } catch (e) {
     syncResult.value = 'err'
+    syncPhase.value = null
     syncing.value = false
-    console.error('Sync trigger failed:', e.message)
+    console.error('Sync failed:', e.message)
   }
 }
 
