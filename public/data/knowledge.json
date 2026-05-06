@@ -104,7 +104,73 @@
       "updatedAt": "2026-04-20"
     }
   ],
-  "readingList": [],
+  "readingList": [
+    {
+      "id": "R001",
+      "title": "测绘学概论",
+      "author": "宁津生",
+      "type": "book",
+      "status": "reading",
+      "progress": 40,
+      "rating": 0,
+      "notes": "",
+      "startDate": null,
+      "completedDate": null,
+      "cover": ""
+    },
+    {
+      "id": "R002",
+      "title": "Designing Data-Intensive Applications",
+      "author": "Martin Kleppmann",
+      "type": "book",
+      "status": "reading",
+      "progress": 30,
+      "rating": 0,
+      "notes": "",
+      "startDate": null,
+      "completedDate": null,
+      "cover": ""
+    },
+    {
+      "id": "R003",
+      "title": "代码整洁之道",
+      "author": "Robert C. Martin",
+      "type": "book",
+      "status": "reading",
+      "progress": 65,
+      "rating": 0,
+      "notes": "",
+      "startDate": null,
+      "completedDate": null,
+      "cover": ""
+    },
+    {
+      "id": "R004",
+      "title": "流畅的 Python（第2版）",
+      "author": "Luciano Ramalho",
+      "type": "book",
+      "status": "want_to_read",
+      "progress": 0,
+      "rating": 0,
+      "notes": "",
+      "startDate": null,
+      "completedDate": null,
+      "cover": ""
+    },
+    {
+      "id": "R005",
+      "title": "三体",
+      "author": "刘慈欣",
+      "type": "book",
+      "status": "completed",
+      "progress": 100,
+      "rating": 0,
+      "notes": "",
+      "startDate": null,
+      "completedDate": null,
+      "cover": ""
+    }
+  ],
   "log": [
     {
       "date": "2026-05-02",

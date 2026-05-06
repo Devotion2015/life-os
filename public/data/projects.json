@@ -1,1 +1,38 @@
-[]
+[
+  {
+    "id": "P001",
+    "name": "信息技术教案制作",
+    "type": "teaching",
+    "status": "active",
+    "deadline": "2026-06-30",
+    "tasks": [],
+    "kr_ids": []
+  },
+  {
+    "id": "P002",
+    "name": "公众号2026运营",
+    "type": "content",
+    "status": "active",
+    "deadline": null,
+    "tasks": [],
+    "kr_ids": []
+  },
+  {
+    "id": "P003",
+    "name": "课堂测验题库构建",
+    "type": "teaching",
+    "status": "planning",
+    "deadline": "2026-09-01",
+    "tasks": [],
+    "kr_ids": []
+  },
+  {
+    "id": "P004",
+    "name": "bird-knowledge 鸟类科普站",
+    "type": "personal",
+    "status": "active",
+    "deadline": null,
+    "tasks": [],
+    "kr_ids": []
+  }
+]
