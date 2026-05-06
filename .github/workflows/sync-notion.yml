@@ -25,8 +25,9 @@ on:
       - 'public/data/life.json'
 
   # ③ 每小时自动从 Notion 拉取（工作时间 08-22）
-  schedule:
-    - cron: '0 8-22 * * *'   # 北京时间 16:00-次日06:00（UTC+8）
+  # ⚠️ 暂禁用 — 待 Pull 安全锁修复验证后再启用
+  # schedule:
+  #   - cron: '0 8-22 * * *'   # 北京时间 16:00-次日06:00（UTC+8）
 
 jobs:
   sync:
