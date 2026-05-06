@@ -41,18 +41,8 @@
     "type": "teaching",
     "status": "planning",
     "deadline": "2026-05-07",
-    "tasks": [],
     "kr_ids": [
       "K004"
     ]
-  },
-  {
-    "id": "P006",
-    "name": "哈哈哈",
-    "type": "personal",
-    "status": "active",
-    "deadline": "2026-05-06",
-    "tasks": [],
-    "kr_ids": []
   }
 ]
