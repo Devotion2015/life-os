@@ -102,7 +102,9 @@ def write_sync_status(updated_categories):
 
 def get_existing_titles(db_id):
     """返回数据库中所有页面的标题集合 — 用于 Push 去重。"""
-    pages = list_notion_pages(db_id)
+    success, pages = list_notion_pages(db_id)
+    if not success:
+        return set()  # API 出错时宁可重试 push 也不丢数据
     titles = set()
     for p in pages:
         t = p.get('properties', {}).get('Name', {}).get('title', [{}])[0].get('text', {}).get('content', '')
@@ -111,13 +113,30 @@ def get_existing_titles(db_id):
     return titles
 
 
+def _get_existing_count(filename, key=None):
+    """读取 JSON 文件中的记录数，用于安全锁判断。"""
+    path = os.path.join(DATA_DIR, filename)
+    if not os.path.exists(path):
+        return 0
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        if key:
+            return len(data.get(key, []))
+        return len(data) if isinstance(data, list) else 0
+    except Exception:
+        return 0
+
 def list_notion_pages(db_id):
-    """分页拉取数据库中所有 page（data_source query）。"""
+    """分页拉取数据库中所有 page（data_source query）。
+    
+    返回 (success, pages) — success 为 False 表示 API 调用失败，
+    调用方可以据此决定是否覆盖本地数据。"""
     pages = []
     ds_ok, ds = notion_api(f'/databases/{db_id}', None, 'GET')
     if not ds_ok:
         print(f'  ⚠️  无法读取数据库 {db_id}: {ds}')
-        return pages
+        return False, pages
     ds_id = ds['data_sources'][0]['id']
     cursor = None
     while True:
@@ -127,12 +146,12 @@ def list_notion_pages(db_id):
         ok, r = notion_api(f'/data_sources/{ds_id}/query', body)
         if not ok:
             print(f'  ⚠️  查询失败: {r}')
-            break
+            return False, pages
         pages.extend(r.get('results', []))
         if not r.get('has_more'):
             break
         cursor = r.get('next_cursor')
-    return pages
+    return True, pages
 
 
 # ═══════════════════════════════════════════════════════════
@@ -346,7 +365,11 @@ def push_media(state):
 
 def pull_projects():
     print('\n📋 Pull: 项目工坊 → projects.json')
-    pages = list_notion_pages(NOTION_DB_IDS['📋 项目工坊'])
+    success, pages = list_notion_pages(NOTION_DB_IDS['📋 项目工坊'])
+    existing_count = _get_existing_count('projects.json')
+    if not success or (len(pages) == 0 and existing_count > 0):
+        print(f'  ⚠️  安全锁: API {"失败" if not success else "返回空"}，保留 {existing_count} 条现有数据')
+        return 0
     status_map = {'🚀 进行中': 'active', '📋 规划中': 'planning', '✅ 已完成': 'completed', '⏸️ 暂停': 'paused'}
     type_map = {'教学': 'teaching', '公众号': 'content', '编程': 'personal', '科研': 'research', '个人': 'personal'}
 
@@ -385,7 +408,11 @@ def pull_projects():
 
 def pull_finance():
     print('\n💰 Pull: 财务账本 → finance.json')
-    pages = list_notion_pages(NOTION_DB_IDS['💰 财务账本'])
+    success, pages = list_notion_pages(NOTION_DB_IDS['💰 财务账本'])
+    existing_count = _get_existing_count('finance.json', 'transactions')
+    if not success or (len(pages) == 0 and existing_count > 0):
+        print(f'  ⚠️  安全锁: API {"失败" if not success else "返回空"}，保留 {existing_count} 条现有数据')
+        return 0
     type_map = {'📤 支出': 'expense', '📥 收入': 'income'}
     cat_map = {'餐饮': 'dining', '办公': 'office', '购物': 'shopping', '娱乐': 'entertainment',
                '交通': 'transport', '学习': 'books', '居住': 'housing'}
@@ -425,7 +452,11 @@ def pull_finance():
 
 def pull_reading():
     print('\n📚 Pull: 阅读笔记 → knowledge.json')
-    pages = list_notion_pages(NOTION_DB_IDS['📚 阅读笔记'])
+    success, pages = list_notion_pages(NOTION_DB_IDS['📚 阅读笔记'])
+    existing_count = _get_existing_count('knowledge.json', 'readingList')
+    if not success or (len(pages) == 0 and existing_count > 0):
+        print(f'  ⚠️  安全锁: API {"失败" if not success else "返回空"}，保留 {existing_count} 条现有数据')
+        return 0
     status_map = {'📖 在读': 'reading', '✅ 已读': 'completed', '📚 想读': 'want_to_read', '🚫 弃读': 'dropped'}
 
     seen = {}
@@ -464,7 +495,11 @@ def pull_reading():
 
 def pull_media():
     print('\n🎬 Pull: 影视清单 → life.json')
-    pages = list_notion_pages(NOTION_DB_IDS['🎬 影视清单'])
+    success, pages = list_notion_pages(NOTION_DB_IDS['🎬 影视清单'])
+    existing_count = _get_existing_count('life.json', 'media')
+    if not success or (len(pages) == 0 and existing_count > 0):
+        print(f'  ⚠️  安全锁: API {"失败" if not success else "返回空"}，保留 {existing_count} 条现有数据')
+        return 0
     type_map = {'📺 剧集': 'tv', '🎬 电影': 'movie', '🐣 动漫': 'anime', '📖 纪录片': 'documentary'}
     status_map = {'👀 在看': 'watching', '✅ 已看': 'completed', '🔖 想看': 'want_to_watch'}
 
@@ -506,7 +541,11 @@ def pull_media():
 def pull_okrs():
     """📊 OKR 追踪 → okr.json"""
     print('\n📊 Pull: OKR → okr.json')
-    pages = list_notion_pages(NOTION_DB_IDS['📊 OKR 追踪'])
+    success, pages = list_notion_pages(NOTION_DB_IDS['📊 OKR 追踪'])
+    existing_count = _get_existing_count('okr.json')
+    if not success or (len(pages) == 0 and existing_count > 0):
+        print(f'  ⚠️  安全锁: API {"失败" if not success else "返回空"}，保留 {existing_count} 条现有数据')
+        return 0
     area_map = {'教学': 'work', '公众号': 'side', '个人': 'personal', '科研': 'research'}
 
     import re
