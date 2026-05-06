@@ -126,5 +126,21 @@
         "unit": "%"
       }
     ]
+  },
+  {
+    "id": 6,
+    "title": "git-notion",
+    "description": "",
+    "quarter": "2026-Q3",
+    "status": "active",
+    "key_results": [
+      {
+        "id": "K004",
+        "title": "测试git到notion",
+        "current": 0,
+        "target": 100,
+        "unit": "%"
+      }
+    ]
   }
 ]
