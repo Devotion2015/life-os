@@ -566,19 +566,34 @@ def pull_okrs():
         rt = props.get('关键结果', {}).get('rich_text', [])
         if rt:
             kr_text = rt[0].get('text', {}).get('content', '')
+            # 支持两种格式:
+            #   带进度: N. Title (current/targetunit)
+            #   纯文本: N. Title
+            progress_re = re.compile(r'^(\d+)\.\s*(.+?)\s*\((\d+)/(\d+)(\S+?)\)$')
+            simple_re = re.compile(r'^(\d+)\.\s*(.+)$')
             for line in kr_text.split('\n'):
                 line = line.strip()
                 if not line:
                     continue
-                m = re.match(r'^(\d+)\.\s+(.+?)\s+\((\d+)/(\d+)(\S+?)\)$', line)
-                if m:
+                pm = progress_re.match(line)
+                if pm:
                     krs.append({
                         'id': f'K{len(krs)+1:03d}',
-                        'title': m.group(2),
-                        'current': int(m.group(3)),
-                        'target': int(m.group(4)),
-                        'unit': m.group(5),
+                        'title': pm.group(2),
+                        'current': int(pm.group(3)),
+                        'target': int(pm.group(4)),
+                        'unit': pm.group(5),
                     })
+                else:
+                    sm = simple_re.match(line)
+                    if sm:
+                        krs.append({
+                            'id': f'K{len(krs)+1:03d}',
+                            'title': sm.group(2),
+                            'current': 0,
+                            'target': 0,
+                            'unit': '',
+                        })
 
         seen[title] = {
             'id': len(seen) + 1,
