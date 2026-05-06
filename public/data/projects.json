@@ -34,5 +34,15 @@
     "deadline": null,
     "tasks": [],
     "kr_ids": []
+  },
+  {
+    "id": "P005",
+    "name": "git-notion项目",
+    "type": "teaching",
+    "status": "planning",
+    "deadline": "2026-05-07",
+    "kr_ids": [
+      "K004"
+    ]
   }
 ]
