@@ -1,5 +1,78 @@
 {
-  "media": [],
+  "media": [
+    {
+      "id": "M001",
+      "title": "流人 (Slow Horses) S4",
+      "type": "tv",
+      "status": "want_to_watch",
+      "progress": "",
+      "rating": 0,
+      "notes": "听说回归水准了",
+      "startDate": null,
+      "completedDate": null,
+      "tags": []
+    },
+    {
+      "id": "M002",
+      "title": "三体",
+      "type": "tv",
+      "status": "watching",
+      "progress": "",
+      "rating": 0,
+      "notes": "国产科幻之光，改编得不错",
+      "startDate": null,
+      "completedDate": null,
+      "tags": []
+    },
+    {
+      "id": "M003",
+      "title": "奥本海默",
+      "type": "movie",
+      "status": "completed",
+      "progress": "",
+      "rating": 0,
+      "notes": "诺兰神作，音效震撼。科学与政治的纠缠令人深思",
+      "startDate": null,
+      "completedDate": null,
+      "tags": []
+    },
+    {
+      "id": "M004",
+      "title": "鬼灭之刃 柱训练篇",
+      "type": "anime",
+      "status": "watching",
+      "progress": "",
+      "rating": 0,
+      "notes": "制作依然精良",
+      "startDate": null,
+      "completedDate": null,
+      "tags": []
+    },
+    {
+      "id": "M005",
+      "title": "葬送的芙莉莲",
+      "type": "anime",
+      "status": "completed",
+      "progress": "",
+      "rating": 0,
+      "notes": "年度最佳！关于时间、记忆与羁绊的温柔叙事",
+      "startDate": null,
+      "completedDate": null,
+      "tags": []
+    },
+    {
+      "id": "M006",
+      "title": "沙丘2",
+      "type": "movie",
+      "status": "want_to_watch",
+      "progress": "",
+      "rating": 0,
+      "notes": "等上线再看",
+      "startDate": null,
+      "completedDate": null,
+      "tags": []
+    }
+  ],
   "hobbies": [
     {
       "id": "H001",
